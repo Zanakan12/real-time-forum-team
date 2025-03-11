@@ -15,7 +15,7 @@ func InitServer() {
 	// Add handlers for different routes
 	server.Handle("/", handlers.IndexHandler) // Root route
 	//server.Handle("/about", handlers.AboutHandler) // About route
-	server.Handle("/register", handlers.RegisterHandler)
+	//server.Handle("/register", handlers.RegisterHandler)
 	server.Handle("/login", handlers.LoginHandler)
 	server.Handle("/login-validation", handlers.LoginValidationHandler)
 	server.Handle("/register-validation", handlers.RegisterValidationHandler)
