@@ -20,7 +20,7 @@ export function loginPage() {
                 </tr>
                 <tr>
                     <td><label for="username_mail">Email ou Pseudo:</label></td>
-                    <td><input type="text" id="username_mail" name="username_mail" required></td>
+                    <td><input type="text" id="username_mail" name="username_mail" required placeholder="first_name"></td>
                 </tr>
                 <tr>
                     <td><label for="password">Mot de passe:</label></td>
