@@ -16,48 +16,19 @@ const routes = {
   },
   register: RegisterPage,
   login: loginPage,
-  about: () => {
-    const div = document.createElement("div");
-    div.innerHTML =
-      "<h2>À propos du forum</h2><p>Bienvenue dans notre forum en temps réel.</p>";
-    return div;
-  },
-  contact: () => {
-    const div = document.createElement("div");
-    div.innerHTML =
-      "<h2>Contact</h2><p>Contactez-nous pour toute question.</p>";
-    return div;
-  },
-  posts: () => {
-    const div = document.createElement("div");
-    div.id = "post-container"; // On crée un conteneur pour les posts
-    loadPosts(); // Charge les posts via posts.js
-    return div;
-  },
+
 };
 
 async function loadPage() {
-  const hash = window.location.hash.substring(1) || "home";
-  const app = document.getElementById("app");
-  app.innerHTML = ""; // On vide le contenu actuel
-  if (routes[hash]) {
-    const page = routes[hash]();
-    app.appendChild(page);
-
-    // Si c'est la page des posts, on charge les posts après avoir ajouté le conteneur
-    if (hash === "posts") {
-      await loadPosts();
+    const hash = window.location.hash.substring(1) || "home";
+    const page = routes[hash] ? routes[hash]() : routes["home"]();
+    const app = document.getElementById("app");
+    app.innerHTML = ""; // On vide le contenu actuel
+    app.appendChild(page); // On affiche la nouvelle page.innerHTML = "<h2>Page introuvable</h2>";
     }
-  } else {
-    app.innerHTML = "<h2>Page introuvable</h2>";
-  }
-}
 
-//fonction pour le footer
-/*function loadFooter() {
-    document.getElementById("footer-container").innerHTML = footerPage();
-}*/
-//fonction pour le header
+
+
 
 // ensemble des fonctions d'erreurs
 

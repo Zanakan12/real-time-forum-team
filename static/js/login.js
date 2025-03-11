@@ -19,7 +19,7 @@ export function loginPage() {
                     </td>
                 </tr>
                 <tr>
-                    <td><label for="username_mail">Email ou Pseudo:</label></td>
+                    <td><label for="username_mail">Email:</label></td>
                     <td><input type="text" id="username_mail" name="username_mail" required placeholder="first_name"></td>
                 </tr>
                 <tr>

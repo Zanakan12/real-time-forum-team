@@ -12,22 +12,22 @@ document.addEventListener("DOMContentLoaded", function () {
             </td>
             <td id="spacer"></td>
             <td id="profile-button">
-              <button onclick="window.location.href='/profile'">Profile</button>
+              <button onclick="window.location.href='#profile'">Profile</button>
             </td>
             <td id="notifications-button">
-              <button onclick="window.location.href='/notifications'">🔔</button>
+              <button onclick="window.location.href='#notifications'">🔔</button>
             </td>
             <td id="login-button">
-              <button onclick="window.location.href='/login'">Login</button>
+              <button onclick="window.location.href='#login'">Login</button>
             </td>
             <td id="register-button">
-              <button onclick="window.location.href='/register'">Register</button>
+              <button onclick="window.location.href='#register'">Register</button>
             </td>
             <td id="moderator-panel-button">
-              <button onclick="window.location.href='/mod'">Moderator Panel</button>
+              <button onclick="window.location.href='#mod'">Moderator Panel</button>
             </td>
             <td id="admin-panel-button">
-              <button onclick="window.location.href='/admin'">Admin Panel</button>
+              <button onclick="window.location.href='#admin'">Admin Panel</button>
             </td>
             <td id="chat-button">
               <button id="open-chat">chat 💬</button>
@@ -40,6 +40,5 @@ document.addEventListener("DOMContentLoaded", function () {
       `;
 
   const navContainer = document.getElementById("navstick");
-
   navContainer.innerHTML = navHTML;
 });
