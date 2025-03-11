@@ -40,6 +40,17 @@ async function loadPage() {
   const hash = window.location.hash.substring(1) || "home";
   const app = document.getElementById("app");
   app.innerHTML = ""; // On vide le contenu actuel
+  if (routes[hash]) {
+    const page = routes[hash]();
+    app.appendChild(page);
+
+    // Si c'est la page des posts, on charge les posts après avoir ajouté le conteneur
+    if (hash === "posts") {
+      await loadPosts();
+    }
+  } else {
+    app.innerHTML = "<h2>Page introuvable</h2>";
+  }
 }
 
 //fonction pour le footer
