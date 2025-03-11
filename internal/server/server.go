@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"handlers"
 	"middlewares"
+	"net/http"
 	"time"
 )
 
@@ -15,7 +16,7 @@ func InitServer() {
 	// Add handlers for different routes
 	server.Handle("/", handlers.IndexHandler) // Root route
 	//server.Handle("/about", handlers.AboutHandler) // About route
-	server.Handle("/register", handlers.RegisterHandler)
+	//server.Handle("/register", handlers.RegisterHandler)
 	server.Handle("/login", handlers.LoginHandler)
 	server.Handle("/login-validation", handlers.LoginValidationHandler)
 	server.Handle("/register-validation", handlers.RegisterValidationHandler)
@@ -33,6 +34,10 @@ func InitServer() {
 	server.Handle("/comment-update-validation", handlers.CommentUpdateValidationHandler)
 	server.Handle("/moderator", handlers.ModeratorPowerHandler)
 	server.Handle("/mod", handlers.ModeratorInterfaceHandler)
+
+	//les routes api que je suis entrain d'ajouter pour les pages modifier
+
+	http.HandleFunc("/register", handlers.RegisterDataAPIHandler)
 
 	// Ajout des routes pour l'authentification Google
 	server.Handle("/google-login", handlers.HandleGoogleLogin)
