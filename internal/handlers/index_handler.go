@@ -63,7 +63,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	mostRecentPosts = countLikesDislikes(mostRecentPosts)
 	// Parse the templates from files.
 	tmpl, err := template.ParseFiles(
-		"web/pages/index.html",
+		"web/templates/index1.html",
 		"web/templates/tmpl_nav.html",
 		"web/templates/tmpl_newpost.html",
 		"web/templates/tmpl_categories.html",

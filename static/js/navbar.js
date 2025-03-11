@@ -39,6 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
         </table>
       `;
 
-  const navContainer = document.getElementById("navbar");
+  const navContainer = document.getElementById("navstick");
+
   navContainer.innerHTML = navHTML;
 });

@@ -1,7 +1,6 @@
 import { RegisterPage } from "/static/js/register.js";
 import { loginPage } from "/static/js/login.js";
-//import { loadPosts } from "/static/js/posts.js";
-import { Navbar } from "static/js/navbar.js";
+//import { loadPosts } from "/static/js/posts.js"
 //import { footerPage } from "/static/js/footer.js";
 //import { headerPage } from "/static/js/header.js";
 
@@ -39,9 +38,7 @@ const routes = {
 async function loadPage() {
   const hash = window.location.hash.substring(1) || "home";
   const app = document.getElementById("app");
-  const nav = Navbar();
   app.innerHTML = ""; // On vide le contenu actuel
-  app.innerHTML = nav;
   if (routes[hash]) {
     const page = routes[hash]();
     app.appendChild(page);
@@ -66,12 +63,7 @@ async function loadPage() {
 // Écoute les changements d'URL
 window.addEventListener("hashchange", loadPage);
 window.addEventListener("DOMContentLoaded", loadPage);
-window.addEventListener("DOMContentLoaded", () => {
-  const nav = document.getElementById("navbar");
-  nav.innerHTML=
-  headerPage();
-  footerPage();
-});
+window.addEventListener("DOMContentLoaded", () => {});
 //document.addEventListener("DOMContentLoaded", loadFooter);
 
 //appel des fonction handleErreur en cas d'erreur détectée
