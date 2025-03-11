@@ -1,41 +1,40 @@
 package handlers
 
 import (
-	"html/template"
+	"encoding/json"
 	"net/http"
 	"net/url"
 )
 
-func RegisterHandler(w http.ResponseWriter, r *http.Request) {
+// Structure pour contenir les données de la page Register
+type RegisterPageData struct {
+	Error          string `json:"error"`
+	EmailLabel     string `json:"email_label"`
+	FirstNameLabel string `json:"first_name_label"`
+	LastNameLabel  string `json:"last_name_label"`
+	UsernameLabel  string `json:"username_label"`
+	PasswordLabel  string `json:"password_label"`
+}
+
+// Fonction pour servir les données JSON de l'inscription
+func RegisterDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 	// Récupérer le message d'erreur s'il existe
 	errorMsg := r.URL.Query().Get("error")
 	if errorMsg != "" {
 		errorMsg, _ = url.QueryUnescape(errorMsg)
 	}
-	// Parse the templates from files.
-	tmpl, err := template.ParseFiles(
-		"web/pages/register.html",
-		"web/templates/tmpl_register.html",
-		"web/templates/tmpl_nav.html",
-	)
 
-	if err != nil {
-		http.Error(w, "Internal Server Error (Error parsing templates)", http.StatusInternalServerError)
-		return
+	// Remplir la structure de données
+	registerData := RegisterPageData{
+		Error:          errorMsg,
+		EmailLabel:     "Email",
+		FirstNameLabel: "First Name",
+		LastNameLabel:  "Last Name",
+		UsernameLabel:  "Username",
+		PasswordLabel:  "Password",
 	}
-	registerData := RegisterPage{
-		Nav:               NavData,
-		Title:             "Forum | Register",
-		NotificationCount: 0,
-		UserRole:          "traveler",
-		Register:          RegisterData,
-		CurrentPage:       "register",
-	}
-	registerData.Register.Error = errorMsg
-	// Execute the template and pass any data needed (nil here for simplicity).
-	err = tmpl.Execute(w, registerData)
-	if err != nil {
-		http.Error(w, "Internal Server Error (Error executing template)", http.StatusInternalServerError)
-		return
-	}
+
+	// Convertir en JSON et envoyer la réponse
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(registerData)
 }
