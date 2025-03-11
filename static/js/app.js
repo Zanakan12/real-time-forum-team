@@ -1,5 +1,6 @@
 import { RegisterPage } from "/static/js/register.js";
 import { loginPage } from "/static/js/login.js";
+import { loadPosts } from "/static/js/posts.js";
 //import { footerPage } from "/static/js/footer.js";
 //import { headerPage } from "/static/js/header.js";
 
@@ -23,16 +24,33 @@ const routes = {
         const div = document.createElement("div");
         div.innerHTML = "<h2>Contact</h2><p>Contactez-nous pour toute question.</p>";
         return div;
+    },
+    "posts": () => {
+        const div = document.createElement("div");
+        div.id = "post-container"; // On crée un conteneur pour les posts
+        loadPosts(); // Charge les posts via posts.js
+        return div;
     }
 };
 
-function loadPage() {
-    const hash = window.location.hash.substring(1) || "home"; // Récupère l'URL après #
-    const page = routes[hash] ? routes[hash]() : routes["home"]();
+async function loadPage() {
+    const hash = window.location.hash.substring(1) || "home";
     const app = document.getElementById("app");
     app.innerHTML = ""; // On vide le contenu actuel
-    app.appendChild(page); // On affiche la nouvelle page
+
+    if (routes[hash]) {
+        const page = routes[hash]();
+        app.appendChild(page);
+
+        // Si c'est la page des posts, on charge les posts après avoir ajouté le conteneur
+        if (hash === "posts") {
+            await loadPosts();
+        }
+    } else {
+        app.innerHTML = "<h2>Page introuvable</h2>";
+    }
 }
+
 
 //fonction pour le footer
 /*function loadFooter() {
