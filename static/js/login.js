@@ -1,39 +1,56 @@
-export function loginPage () {
-const div = document.createElement("div");
-div.innerHTML = `
-    <form action="/login-validation" method="post">
-    <table class="post">
-        <tr>{{.Login.Error}}</tr>
-        <tr>
-            <td>{{.Login.Message}}</td>
-            <td style="display: flex; justify-content: space-between;">
-                <button onclick="window.location.href='/google-login'" style="background-color: rgb(37, 37, 37);">
-                    <img src="/static/assets/img/google_logo.png" alt="" style="height: 2em;">
-                </button>
-                <button onclick="window.location.href='/reddit-login'" style="background-color: rgb(37, 37, 37);">
-                    <img src="/static/assets/img/reddit_logo.png" alt="" style="height: 2em;">
-                </button>
-                <button onclick="window.location.href='/dis-login'" style="background-color: rgb(37, 37, 37);">
-                    <img src="/static/assets/img/discord-logo.png" alt="" style="height: 2em;">
-                </button>
-            </td>
-        </tr>
-        <tr>
-            <td><label for="email">{{.Login.EmailLabel}}</label></td>
-            <td><input type="email" id="email" name="email" required></td>
-        </tr>
+export function loginPage() {
+    const div = document.createElement("div");
+    div.innerHTML = `
+        <form id="login-form">
+            <table class="post">
+                <tr id="login-error"></tr>
+                <tr>
+                    <td id="login-message"></td>
+                    <td style="display: flex; justify-content: space-between;">
+                        <button type="button" onclick="window.location.href='/google-login'" style="background-color: rgb(37, 37, 37);">
+                            <img src="/static/assets/img/google_logo.png" alt="" style="height: 2em;">
+                        </button>
+                        <button type="button" onclick="window.location.href='/reddit-login'" style="background-color: rgb(37, 37, 37);">
+                            <img src="/static/assets/img/reddit_logo.png" alt="" style="height: 2em;">
+                        </button>
+                        <button type="button" onclick="window.location.href='/dis-login'" style="background-color: rgb(37, 37, 37);">
+                            <img src="/static/assets/img/discord-logo.png" alt="" style="height: 2em;">
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td><label for="username_mail">Email ou Pseudo:</label></td>
+                    <td><input type="text" id="username_mail" name="username_mail" required></td>
+                </tr>
+                <tr>
+                    <td><label for="password">Mot de passe:</label></td>
+                    <td><input type="password" id="password" name="password" required></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td style="text-align: right;"><input type="submit" value="Se connecter"></td>
+                </tr>
+            </table>
+        </form>
+    `;
 
-        <tr>
-            <td><label for="password">{{.Login.PasswordLabel}}</label></td>
-            <td><input type="password" id="password" name="password" required></td>
-        </tr>
+    // Ajout de l'événement pour intercepter la soumission du formulaire
+    div.querySelector("#login-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        const response = await fetch("/login-validation", {
+            method: "POST",
+            body: formData
+        });
 
-        <tr>
-            <td></td>
-            <td style="text-align: right;"><input type="submit" value="Submit"></td>
-        </tr>
-    </table>
-</form>
-`;
-return div
+        if (response.redirected) {
+            window.location.href = response.url;
+        } else {
+            const errorText = await response.text();
+            document.getElementById("login-error").innerText = errorText;
+        }
+    });
+
+    return div;
 }
