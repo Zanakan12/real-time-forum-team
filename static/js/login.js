@@ -1,6 +1,6 @@
 export function loginPage() {
-  const div = document.createElement("div");
-  div.innerHTML = `
+    const div = document.createElement("div");
+    div.innerHTML = `
         <form id="login-form">
             <table class="post">
                 <tr id="login-error"></tr>
@@ -19,7 +19,7 @@ export function loginPage() {
                     </td>
                 </tr>
                 <tr>
-                    <td><label for="username_mail">Email ou Pseudo:</label></td>
+                    <td><label for="username_mail">Email:</label></td>
                     <td><input type="text" id="username_mail" name="username_mail" required placeholder="first_name"></td>
                 </tr>
                 <tr>
@@ -34,8 +34,8 @@ export function loginPage() {
         </form>
     `;
 
-  // Ajout de l'événement pour intercepter la soumission du formulaire
-  div.querySelector("#login-form").addEventListener("submit", async (e) => {
+    // Ajout de l'événement pour intercepter la soumission du formulaire
+    div.querySelector("#login-form").addEventListener("submit", async (e) => {
         e.preventDefault();
         
         const formData = new FormData(e.target);
@@ -52,5 +52,5 @@ export function loginPage() {
         }
     });
 
-  return div;
+    return div;
 }
