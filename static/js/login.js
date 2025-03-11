@@ -1,6 +1,6 @@
 export function loginPage() {
-    const div = document.createElement("div");
-    div.innerHTML = `
+  const div = document.createElement("div");
+  div.innerHTML = `
         <form id="login-form">
             <table class="post">
                 <tr id="login-error"></tr>
@@ -34,8 +34,8 @@ export function loginPage() {
         </form>
     `;
 
-    // Ajout de l'événement pour intercepter la soumission du formulaire
-    div.querySelector("#login-form").addEventListener("submit", async (e) => {
+  // Ajout de l'événement pour intercepter la soumission du formulaire
+  div.querySelector("#login-form").addEventListener("submit", async (e) => {
         e.preventDefault();
         
         const formData = new FormData(e.target);
@@ -52,5 +52,5 @@ export function loginPage() {
         }
     });
 
-    return div;
+  return div;
 }
