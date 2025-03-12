@@ -15,7 +15,6 @@ type ProfileData struct {
 	UserID            int
 	CreatedAt         string
 	MostRecentPosts   []db.Post
-	Nav               NavTmpl
 	NotificationCount int
 	Error             string
 	Success           string
@@ -52,7 +51,6 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		Username:          userName,
 		UserRole:          session.Role,
 		UserID:            session.UserID,
-		Nav:               NavData,
 		MostRecentPosts:   activities,
 		NotificationCount: countUnReadNotifications(notifications),
 		Error:             r.URL.Query().Get("error"),

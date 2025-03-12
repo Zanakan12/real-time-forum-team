@@ -31,7 +31,6 @@ func Err404Handler(w http.ResponseWriter, r *http.Request) {
 	}
 	err404Data := IndexPage{
 		Title:             "4mood",
-		Nav:               NavData,
 		UserID:            session.UserID,
 		UserUsername:      session.Username,
 		UserRole:          session.Role,
@@ -70,7 +69,6 @@ func Err429Handler(w http.ResponseWriter, r *http.Request) {
 	}
 	err404Data := IndexPage{
 		Title:             "4mood",
-		Nav:               NavData,
 		UserID:            session.UserID,
 		UserUsername:      session.Username,
 		UserRole:          session.Role,
@@ -109,7 +107,6 @@ func Err400Handler(w http.ResponseWriter, r *http.Request) {
 	}
 	err404Data := IndexPage{
 		Title:             "4mood",
-		Nav:               NavData,
 		UserID:            session.UserID,
 		UserUsername:      session.Username,
 		UserRole:          session.Role,
@@ -148,7 +145,6 @@ func Err500Handler(w http.ResponseWriter, r *http.Request) {
 	}
 	err404Data := IndexPage{
 		Title:             "4mood",
-		Nav:               NavData,
 		UserID:            session.UserID,
 		UserUsername:      session.Username,
 		UserRole:          session.Role,

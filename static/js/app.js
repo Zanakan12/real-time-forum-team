@@ -1,5 +1,6 @@
 import { RegisterPage } from "/static/js/register.js";
 import { loginPage } from "/static/js/login.js";
+import {homePage} from "/static/js/home.js"
 ////import { loadPosts } from "/static/js/posts.js"
 
 //import { footerPage } from "/static/js/footer.js";
@@ -9,14 +10,9 @@ import { loginPage } from "/static/js/login.js";
 
 //les routes pour les éléments
 const routes = {
-  home: () => {
-    const div = document.createElement("div");
-    div.innerHTML = "<h2>Bienvenue sur le forum</h2>";
-    return div;
-  },
   register: RegisterPage,
   login: loginPage,
-
+  home: homePage
 };
 
 async function loadPage() {
@@ -26,9 +22,6 @@ async function loadPage() {
     app.innerHTML = ""; // On vide le contenu actuel
     app.appendChild(page); // On affiche la nouvelle page.innerHTML = "<h2>Page introuvable</h2>";
     }
-
-
-
 
 // ensemble des fonctions d'erreurs
 
