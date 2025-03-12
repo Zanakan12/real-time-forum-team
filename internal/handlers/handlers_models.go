@@ -116,7 +116,7 @@ var NavData NavTmpl = NavTmpl{
 			Href:  "/admin",
 		},
 		Link{
-			Label: "Chat",
+			Label: "chat 💬",
 			Href:  "/chat",
 		},
 		Link{

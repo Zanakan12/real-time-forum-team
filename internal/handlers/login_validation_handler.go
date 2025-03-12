@@ -2,61 +2,57 @@ package handlers
 
 import (
 	"db"
-	"encoding/json"
+	"html/template"
 	"middlewares"
 	"net/http"
+	"net/url"
 	"strings"
 )
 
-type LoginValidationResponse struct {
-	Success    bool   `json:"success"`
-	RedirectTo string `json:"redirect_to,omitempty"`
-	Error      string `json:"error,omitempty"`
+// Structure to pass data to the template
+type BanMessageData struct {
+	Username string
+	Message  string
 }
 
 func LoginValidationHandler(w http.ResponseWriter, r *http.Request) {
-	// Vérifier que la méthode est bien POST
+	// Check if the method is POST
 	if r.Method != http.MethodPost {
-		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
-	// Récupérer les données du formulaire
-	email := strings.ToLower(r.FormValue("username_mail"))
+	// Retrieve form data
+	email := strings.ToLower(r.FormValue("email"))
 	password := r.FormValue("password")
+	
 
-	// Vérifier les informations d'identification avec la base de données
+	// Call the database validation function
 	user, err := db.UserSelectLogin(email, password)
 	if err != nil {
-		// Retourner une erreur en JSON
-		response := LoginValidationResponse{
-			Success: false,
-			Error:   "Identifiants incorrects",
-		}
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(response)
+		// On error, redirect to the login page with an error message
+		errorMsg := url.QueryEscape(err.Error())
+		http.Redirect(w, r, "/login?error="+errorMsg, http.StatusSeeOther)
 		return
 	}
 
-	// Vérifier si l'utilisateur est banni
+	// Check if the user is banned
 	if user.Role == "banned" {
-		response := LoginValidationResponse{
-			Success: false,
-			Error:   "Votre compte est banni.",
+		// Parse the ban message template
+		tmpl, tmplErr := template.ParseFiles("web/pages/login.html", "web/templates/tmpl_message_usr_ban.html","web/templates/tmpl_login.html")
+		if tmplErr != nil {
+			http.Error(w, "Error rendering the access denied page", http.StatusInternalServerError)
+			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(response)
+
+		// Render the defined ban message template
+		tmpl.ExecuteTemplate(w, "ban_message", nil)
 		return
 	}
 
-	// Création de la session
+	// Create a session for the non-banned user
 	middlewares.CreateSession(w, user.ID, user.Username, user.Role)
 
-	// Retourner une réponse JSON indiquant la redirection
-	response := LoginValidationResponse{
-		Success:    true,
-		RedirectTo: "/",
-	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	// Redirect to the homepage
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
