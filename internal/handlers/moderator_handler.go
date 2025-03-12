@@ -48,7 +48,7 @@ func ModeratorPowerHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to update post status", http.StatusInternalServerError)
 		return
 	}
-	err = db.RequestToAdmin(id, title, status, sql.NullString{String: "", Valid:false})
+	err = db.RequestToAdmin(id, title, status, sql.NullString{String: "", Valid: false})
 	if err != nil {
 		log.Printf("Error updating post status to mod table: %v", err)
 		http.Error(w, "Failed to update post status to mod table", http.StatusInternalServerError)
@@ -70,13 +70,11 @@ func ModeratorInterfaceHandler(w http.ResponseWriter, r *http.Request) {
 	notifications, _ := db.NotificationsSelect(session.UserID)
 	// Structure for passing the data to the template
 	data := struct {
-		Nav               NavTmpl
 		ModeratorRequests []db.ModeratorRequest
 		UserRole          string
 		NotificationCount int
 		CurrentPage       string
 	}{
-		Nav:               NavData,
 		ModeratorRequests: adminResponse,
 		UserRole:          userRole,
 		NotificationCount: countUnReadNotifications(notifications),

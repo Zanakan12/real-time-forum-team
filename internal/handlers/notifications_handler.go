@@ -16,7 +16,6 @@ type NotificationsData struct {
 	CreatedAt         string
 	Comments          []db.Comment
 	LikesDislikes     []db.LikesDislikes
-	Nav               NavTmpl
 	NotificationCount int
 	CurrentPage		  string
 }
@@ -59,7 +58,6 @@ func NotificationsHandler(w http.ResponseWriter, r *http.Request) {
 		Title:             "Notifications",
 		UserRole:          session.Role,
 		UserID:            session.UserID,
-		Nav:               NavData,
 		Comments:          comments,
 		LikesDislikes:     likesDislikes,
 		NotificationCount: countUnReadNotifications(notifications),

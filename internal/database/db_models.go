@@ -1,98 +1,122 @@
 package db
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
+// Structure d'un utilisateur
 type User struct {
-	ID        int
-	Email     string
-	Username  string
-	Password  string
-	Role      string
-	CreatedAt string
+	ID        int    `json:"id"`
+	Email     string `json:"email"`
+	Username  string `json:"username"`
+	Password  string `json:"password"`
+	Role      string `json:"role"`
+	CreatedAt string `json:"created_at"`
 }
 
+// Structure d'un post
 type Post struct {
-	ID            int
-	UserID        int
-	Title         string
-	Body          string
-	Status        string
-	CreatedAt     string
-	UpdatedAt     string
-	User          User
-	ImagePath     string
-	Categories    []Category
-	Comments      []Comment
-	LikesDislikes []LikesDislikes
-	LikesCount    int
-	DislikesCount int
+	ID            int             `json:"id"`
+	UserID        int             `json:"user_id"`
+	Title         string          `json:"title"`
+	Body          string          `json:"body"`
+	Status        string          `json:"status"`
+	CreatedAt     string          `json:"created_at"`
+	UpdatedAt     string          `json:"updated_at"`
+	User          User            `json:"user"`
+	ImagePath     string          `json:"image_path"`
+	Categories    []Category      `json:"categories"`
+	Comments      []Comment       `json:"comments"`
+	LikesDislikes []LikesDislikes `json:"likes_dislikes"`
+	LikesCount    int             `json:"likes_count"`
+	DislikesCount int             `json:"dislikes_count"`
 }
 
+// Structure d'un commentaire
 type Comment struct {
-	ID            int
-	PostID        int
-	UserID        int
-	Content       string
-	CreatedAt     string
-	UpdatedAt     string
-	LikesDislikes []LikesDislikes
-	Username      string
-	LikesCount    int
-	DislikesCount int
-	PostTitle     string
+	ID            int             `json:"id"`
+	PostID        int             `json:"post_id"`
+	UserID        int             `json:"user_id"`
+	Content       string          `json:"content"`
+	CreatedAt     string          `json:"created_at"`
+	UpdatedAt     string          `json:"updated_at"`
+	LikesDislikes []LikesDislikes `json:"likes_dislikes"`
+	Username      string          `json:"username"`
+	LikesCount    int             `json:"likes_count"`
+	DislikesCount int             `json:"dislikes_count"`
+	PostTitle     string          `json:"post_title"`
 }
 
+// Structure d'une catégorie
 type Category struct {
-	ID   int
-	Name string
+	ID   int    `json:"id"`
+	Name string `json:"name"`
 }
 
+// Structure pour l'association entre un post et une catégorie
 type PostCategory struct {
-	PostID     int
-	CategoryId int
+	PostID     int `json:"post_id"`
+	CategoryId int `json:"category_id"`
 }
 
+// Structure pour les likes et dislikes
 type LikesDislikes struct {
-	ID        int
-	UserID    int
-	PostID    sql.NullInt64
-	CommentID sql.NullInt64
-	IsLike    bool
-	CreatedAt string
-	PostTitle string
-	Username  string
+	ID        int           `json:"id"`
+	UserID    int           `json:"user_id"`
+	PostID    sql.NullInt64 `json:"post_id"`
+	CommentID sql.NullInt64 `json:"comment_id"`
+	IsLike    bool          `json:"is_like"`
+	CreatedAt string        `json:"created_at"`
+	PostTitle string        `json:"post_title"`
+	Username  string        `json:"username"`
 }
 
+// Structure pour les images associées à un post
 type Images struct {
-	ID        int
-	PostID    int
-	FilePath  string
-	FileSize  int
-	CreatedAt string
+	ID        int    `json:"id"`
+	PostID    int    `json:"post_id"`
+	FilePath  string `json:"file_path"`
+	FileSize  int    `json:"file_size"`
+	CreatedAt string `json:"created_at"`
 }
 
+// Structure des notifications
 type Notification struct {
-	ID            int64
-	UserID        int64
-	CommentID     sql.NullInt64
-	LikeDislikeID sql.NullInt64
-	IsRead        bool
-	CreatedAt     string
+	ID            int64         `json:"id"`
+	UserID        int64         `json:"user_id"`
+	CommentID     sql.NullInt64 `json:"comment_id"`
+	LikeDislikeID sql.NullInt64 `json:"like_dislike_id"`
+	IsRead        bool          `json:"is_read"`
+	CreatedAt     string        `json:"created_at"`
 }
 
+// Structure des activités utilisateur
 type Activity struct {
-	Type      string
-	Content   string
-	Timestamp string
+	Type      string `json:"type"`
+	Content   string `json:"content"`
+	Timestamp string `json:"timestamp"`
 }
 
+// Structure pour suivre les posts tendances
 type PostTendance struct {
-	PostID int64
-	Count  int
+	PostID int64 `json:"post_id"`
+	Count  int   `json:"count"`
 }
+
+// Structure pour la demande de modération
 type ModeratorRequest struct {
-	PostID           int
-	Title            string
-	ModeratorRequest string
-	AdminResponse    sql.NullString
+	PostID           int            `json:"post_id"`
+	Title            string         `json:"title"`
+	ModeratorRequest string         `json:"moderator_request"`
+	AdminResponse    sql.NullString `json:"admin_response"`
+}
+
+// Structure d'un message WebSocket
+type WebSocketMessage struct {
+	Type      string `json:"type"`       // "message" ou "user_list"
+	Username  string `json:"username"`   // Expéditeur
+	Recipient string `json:"recipient"`  // Destinataire
+	Content   string `json:"content"`    // Contenu du message
+	Read      bool   `json:"read"`       // Indique si le message a été lu
+	CreatedAt string `json:"created_at"` // Timestamp
 }

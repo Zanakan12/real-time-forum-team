@@ -113,7 +113,7 @@ func AdminInterfaceHandler(w http.ResponseWriter, r *http.Request) {
 				log.Println("Error updating post status:", err)
 				return
 			}
-			err = db.RequestToAdmin(id,"", "", sql.NullString{String: status, Valid: true})
+			err = db.RequestToAdmin(id, "", "", sql.NullString{String: status, Valid: true})
 			if err != nil {
 				log.Printf("Error updating post status to mod table: %v", err)
 				http.Error(w, "Failed to update post status to mod table", http.StatusInternalServerError)
@@ -129,7 +129,7 @@ func AdminInterfaceHandler(w http.ResponseWriter, r *http.Request) {
 				log.Println("Error deleting post:", err)
 				return
 			}
-			err = db.RequestToAdmin(id,"", "", sql.NullString{String: "delete", Valid: true})
+			err = db.RequestToAdmin(id, "", "", sql.NullString{String: "delete", Valid: true})
 			if err != nil {
 				log.Printf("Error updating post status to mod table: %v", err)
 				http.Error(w, "Failed to update post status to mod table", http.StatusInternalServerError)
@@ -199,7 +199,6 @@ func AdminInterfaceHandler(w http.ResponseWriter, r *http.Request) {
 	}{
 		Username:          userName,
 		UserRole:          session.Role,
-		Nav:               NavData,
 		Users:             users,
 		Moods:             mood,
 		NotificationCount: countUnReadNotifications(notifications),
