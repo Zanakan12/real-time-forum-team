@@ -43,9 +43,21 @@ export function loginPage() {
             method: "POST",
             body: formData
         });
-
-        if (response.redirected) {
-            window.location.href = response.url;
+        
+        if (response.ok) {
+            // Si la réponse est correcte, vérifier la redirection ou le JSON
+            if (response.redirected) {
+                window.location.href = response.url;
+            } else {
+                const responseData = await response.json(); // Si la réponse est JSON
+                // Assurez-vous que le serveur renvoie un JSON avec une structure appropriée
+                if (responseData.error) {
+                    document.getElementById("login-error").innerText = responseData.error;
+                } else {
+                    // Si tout va bien, rediriger ou afficher un message de succès
+                    window.location.href = responseData.redirectUrl || '/#register'; // Exemple de redirection
+                }
+            }
         } else {
             const errorText = await response.text();
             document.getElementById("login-error").innerText = errorText;

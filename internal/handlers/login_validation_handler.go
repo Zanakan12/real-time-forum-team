@@ -3,6 +3,7 @@ package handlers
 import (
 	"db"
 	"encoding/json"
+	"fmt"
 	"middlewares"
 	"net/http"
 	"strings"
@@ -10,25 +11,26 @@ import (
 
 type LoginValidationResponse struct {
 	Success    bool   `json:"success"`
-	RedirectTo string `json:"redirect_to,omitempty"`
-	Error      string `json:"error,omitempty"`
+	RedirectTo string `json:"redirect"`
+	Error      string `json:"error"`
 }
 
 func LoginValidationHandler(w http.ResponseWriter, r *http.Request) {
-	// Vérifier que la méthode est bien POST
 	if r.Method != http.MethodPost {
 		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
 		return
 	}
 
-	// Récupérer les données du formulaire
+	// Récupérer et normaliser les données du formulaire
 	email := strings.ToLower(r.FormValue("username_mail"))
 	password := r.FormValue("password")
+
+	fmt.Println("Tentative de connexion avec :", email)
 
 	// Vérifier les informations d'identification avec la base de données
 	user, err := db.UserSelectLogin(email, password)
 	if err != nil {
-		// Retourner une erreur en JSON
+		fmt.Println("Erreur lors de la recherche de l'utilisateur :", err)
 		response := LoginValidationResponse{
 			Success: false,
 			Error:   "Identifiants incorrects",
@@ -40,6 +42,7 @@ func LoginValidationHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Vérifier si l'utilisateur est banni
 	if user.Role == "banned" {
+		fmt.Println("Utilisateur banni :", user.Email)
 		response := LoginValidationResponse{
 			Success: false,
 			Error:   "Votre compte est banni.",
@@ -52,11 +55,15 @@ func LoginValidationHandler(w http.ResponseWriter, r *http.Request) {
 	// Création de la session
 	middlewares.CreateSession(w, user.ID, user.Username, user.Role)
 
-	// Retourner une réponse JSON indiquant la redirection
+	fmt.Println("Connexion réussie pour :", user.Email)
+
+	// Réponse de succès avec redirection
 	response := LoginValidationResponse{
 		Success:    true,
 		RedirectTo: "/",
+		Error: "help me",
 	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
