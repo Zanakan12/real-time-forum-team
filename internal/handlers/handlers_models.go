@@ -6,7 +6,6 @@ import (
 
 // One structure for each page.
 type RegisterPage struct {
-	Nav               NavTmpl
 	Title             string
 	Register          RegisterTmpl
 	NotificationCount int
@@ -25,7 +24,6 @@ type RegisterTmpl struct {
 
 type IndexPage struct {
 	Title             string
-	Nav               NavTmpl
 	NewPost           NewPostTmpl
 	Moods             []db.Category
 	MostRecentPosts   []db.Post
@@ -37,12 +35,6 @@ type IndexPage struct {
 	ErrorMsgs         string
 }
 
-type NavTmpl struct {
-	LogoPath string
-	SiteName string
-	Links    []Link
-}
-
 // Because each time we need the register template we need the same infos.
 var RegisterData RegisterTmpl = RegisterTmpl{
 	Message:       "Please register",
@@ -52,7 +44,6 @@ var RegisterData RegisterTmpl = RegisterTmpl{
 }
 
 type LoginPage struct {
-	Nav               NavTmpl
 	Title             string
 	Login             LoginTmpl
 	Moods             []db.Category
@@ -85,43 +76,4 @@ var NewPostData NewPostTmpl = NewPostTmpl{
 type Link struct {
 	Label string
 	Href  string
-}
-
-var NavData NavTmpl = NavTmpl{
-	LogoPath: "/static/assets/img/4.png",
-	SiteName: "mood.",
-	Links: []Link{
-		Link{
-			Label: "Profile",
-			Href:  "/profile",
-		},
-		Link{
-			Label: "Notifications",
-			Href:  "/notifications",
-		},
-		Link{
-			Label: "Login",
-			Href:  "/login",
-		},
-		Link{
-			Label: "Register",
-			Href:  "/register",
-		},
-		Link{
-			Label: "Moderator Panel",
-			Href:  "/mod",
-		},
-		Link{
-			Label: "Admin Panel",
-			Href:  "/admin",
-		},
-		Link{
-			Label: "chat 💬",
-			Href:  "/chat",
-		},
-		Link{
-			Label: "Logout",
-			Href:  "/logout",
-		},
-	},
 }

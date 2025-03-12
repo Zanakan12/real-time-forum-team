@@ -26,12 +26,11 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Assuming this is an empty login form
 	loginData := LoginPage{
-		Nav:               NavData,
 		Title:             "Forum | Login",
 		NotificationCount: 0,
 		UserRole:          "traveler",
 		Login:             LoginData,
-		CurrentPage: 	   "login",
+		CurrentPage:       "login",
 	}
 	loginData.Login.Error = errorMsg
 	// Execute the template and pass any data needed (nil here for simplicity).

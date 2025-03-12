@@ -1,15 +1,14 @@
-document.addEventListener("DOMContentLoaded", function () {
-  function checkContainer() {
-    const lastPostsContainer = document.getElementById("lastposts-container");
-    if (lastPostsContainer) {
-      lastPostsContainer.innerHTML = `
+function checkContainer() {
+  const lastPostsContainer = document.getElementById("lastposts-container");
+  if (lastPostsContainer) {
+    lastPostsContainer.innerHTML = `
             <table class="post">
               <tr><td colspan="3">Loading posts...</td></tr>
             </table>
           `;
-      setTimeout(() => {
-        lastPostsContainer.innerHTML = `
-                <table class="post">
+    setTimeout(() => {
+      lastPostsContainer.innerHTML = `
+                <table id="post" class="post">
                   <tr><td class="posttitle">Example Post</td><td class="username">User123</td><td><span>Category 1</span></td></tr>
                   <tr><td colspan="3" class="written" style="font-style: italic; padding-bottom: 1.3rem;">Written at 2025-03-09</td></tr>
                   <tr><td colspan="3" class="postcontent" style="padding: 1.5rem;">
@@ -24,10 +23,8 @@ document.addEventListener("DOMContentLoaded", function () {
                   </td></tr>
                 </table>
               `;
-      }, 1000);
-    } else {
-      setTimeout(checkContainer, 100); // Réessayer après 100ms
-    }
+    }, 1000);
+  } else {
+    setTimeout(checkContainer, 100); // Réessayer après 100ms
   }
-  checkContainer();
-});
+}

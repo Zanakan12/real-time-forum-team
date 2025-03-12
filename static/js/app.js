@@ -23,9 +23,6 @@ async function loadPage() {
     app.appendChild(page); // On affiche la nouvelle page.innerHTML = "<h2>Page introuvable</h2>";
     }
 
-
-
-
 // ensemble des fonctions d'erreurs
 
 // Écoute les changements d'URL

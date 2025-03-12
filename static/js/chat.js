@@ -211,14 +211,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         username = data.username;
         connectWebSocket();
       } else {
-        window.location.href = "/login";
+       // window.location.href = "/login";
       }
     } catch (error) {
       console.error(
         "❌ Erreur lors de la récupération de l'utilisateur :",
         error
       );
-      window.location.href = "/login";
+     // window.location.href = "/login";
     }
   }
 

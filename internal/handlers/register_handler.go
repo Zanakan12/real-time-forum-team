@@ -24,7 +24,6 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	registerData := RegisterPage{
-		Nav:               NavData,
 		Title:             "Forum | Register",
 		NotificationCount: 0,
 		UserRole:          "traveler",
