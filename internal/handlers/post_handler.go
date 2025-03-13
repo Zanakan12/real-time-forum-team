@@ -132,8 +132,6 @@ func PostValidationHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	// Redirect to the homepage on success
-	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func makeTitle(content string) string {

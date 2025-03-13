@@ -9,7 +9,9 @@ body {
   justify-content: center;
   flex-wrap: wrap;
 }
-
+#main-app {
+  width: 100%;
+}
 /*
   header {
       width: 80vw;
@@ -63,7 +65,6 @@ textarea {
 }
 
 .post {
-  padding: 2rem;
   width: 70%;
   background-color: rgb(37, 37, 37);
   text-align: justify;
@@ -100,17 +101,10 @@ textarea {
   width: 100%;
 }
 
-.post td {
-  /* border: 1px dashed; */
-  padding: 0.5rem;
-}
-
 .postcontent {
-  background-color: rgba(53, 53, 53, 0.4);
   border: none;
   border-radius: 1rem;
   font-style: italic;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .likesbuttons {
@@ -327,10 +321,10 @@ textarea {
   padding: 10px;
 }
 
-#photo-chat {
+.photo-chat {
   width: 60px;
   height: 60px;
-  background-image: url("/static/assets/img/4.");
+  background-image: url("/static/assets/img/rafta74/profileImage.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -393,4 +387,92 @@ textarea {
   top: 80%;
   left: 80%;
   transform: translateX(-50%);
+}
+
+/* post header*/
+#post-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+}
+
+#newpost-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Espacement entre les éléments */
+  max-width: 400px; /* Largeur maximale */
+  margin: auto; /* Centrer le formulaire */
+  padding: 20px;
+  border: 1px solid #201e1e;
+  border-radius: 10px;
+  background-color: rgb(37, 37, 37);
+}
+
+#newpost-section label {
+  font-weight: bold;
+}
+
+#newpost-section input[type="text"],
+#newpost-section input[type="file"],
+#newpost-section input[type="submit"] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+#newpost-section input[type="submit"] {
+  background-color: #555e68;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  border: none;
+}
+
+#newpost-section input[type="submit"]:hover {
+  background-color: #0056b3;
+}
+
+#error-messages {
+  color: red;
+  font-size: 14px;
+}
+
+#categories-container {
+  margin-bottom: 10px;
+}
+
+.file-upload {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.file-upload input[type="file"] {
+  display: none; /* Cache l'input natif */
+}
+
+.file-upload label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.3s ease-in-out;
+}
+
+.file-upload label:hover {
+  background-color: #53585e;
+}
+
+.file-name {
+  display: block;
+  margin-top: 10px;
+  font-size: 14px;
+  color: #333;
+  text-align: center;
 }

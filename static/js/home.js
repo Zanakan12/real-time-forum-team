@@ -18,7 +18,7 @@ export function homePage() {
 
               <div id="chat" class="hidden">
                   <div id="header-chat">
-                    <div id="photo-chat"></div>
+                    <div id="photo-chat" class="photo-chat"></div>
                     <div id="name-chat"></div>   
                     <div id="reduce-chat">_</div>
                     <div id="close-chat">x</div>
@@ -35,54 +35,3 @@ export function homePage() {
 
   return div;
 }
-
-document.addEventListener("DOMContentLoaded", function () {
-  fetch("/?format=json") // Appel de l'API JSON
-    .then((response) => response.json())
-    .then((data) => {
-      console.log("Données reçues :", data.mostRecentPosts);
-
-      let allData = data;
-      // Met à jour la liste des posts dynamiquement
-      const postsContainer = document.getElementById("lastposts-container");
-      postsContainer.innerHTML = ""; // Vide le contenu actuel
-
-      allData.mostRecentPosts.forEach((post) => {
-        console.log("pas d'erreur", post);
-        const postElement = document.createElement("div");
-        postElement.classList.add("post");
-        postElement.innerHTML = `
-                  <table id="post" class="post">
-                  <tr><td class="posttitle">${post.title}</td><td class="username">User123</td><td><span>Category 1</span></td></tr>
-                  <tr><td colspan="3" class="written" style="font-style: italic; padding-bottom: 1.3rem;">Written at ${post.date}</td></tr>
-                  <tr><td colspan="3" class="postcontent" style="padding: 1.5rem;">
-                    <form action="/post-update-validation" method="post">
-                      <input type="hidden" name="post_id" value="1">
-                      <textarea id="textarea-1" name="content" rows="" cols="">This is an example post content.</textarea>
-                      <button type="submit">✏️</button>
-                    </form>
-                  </td></tr>
-                  <tr><td colspan="3" style="text-align: center; padding-top: 2rem;">
-                    <img src="/static/assets/img/pexels-photo-1229042.jpeg" alt="Post Image" style="max-width: 500px; height: auto;" />
-                  </td></tr>
-                </table>
-              `;
-        postsContainer.appendChild(postElement);
-      });
-
-      // Met à jour la liste des catégories dynamiquement
-      const categoriesContainer = document.getElementById(
-        "categories-selection-container"
-      );
-      categoriesContainer.innerHTML = ""; // Vide le contenu actuel
-
-      data.moods.forEach((category) => {
-        const categoryElement = document.createElement("li");
-        categoryElement.textContent = category.name;
-        categoriesContainer.appendChild(categoryElement);
-      });
-    })
-    .catch((error) =>
-      console.error("Erreur lors de la récupération des données :", error)
-    );
-});
