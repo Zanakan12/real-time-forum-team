@@ -3,6 +3,7 @@ import { loginPage } from "/static/js/login.js";
 import { homePage } from "/static/js/home.js";
 import { adminPanel } from "/static/js/admin.js";
 import { profilePage } from "/static/js/profile.js";
+import { showHiddenButton } from "/static/js/navbar.js";
 ////import { loadPosts } from "/static/js/posts.js"
 
 //import { footerPage } from "/static/js/footer.js";
@@ -19,10 +20,15 @@ const routes = {
   profile: profilePage,
 };
 
-async function loadPage() {
-  const hash = window.location.hash.substring(1) || "#home";
+async function loadPage(input) {
+
+  const redirection = input;
+  const hash = window.location.hash.substring(1) || redirection;
+  console.log(hash)
   const app = document.getElementById("app");
   app.innerHTML = ""; // On vide le contenu actuel
+  let userData = await fetchUserData();
+  if (userData.username) showHiddenButton(userData);
 
   console.log("Changement de page vers :", hash);
 
@@ -51,27 +57,24 @@ async function loadPage() {
 
 // Écoute les changements d'URL
 window.addEventListener("hashchange", loadPage);
-window.addEventListener("DOMContentLoaded", loadPage);
 
 window.addEventListener("DOMContentLoaded", async () => {
-  let userData;
-  async function fetchUserData() {
-    try {
-      const response = await fetch("https://localhost:8080/api/get-user");
-      const data = await response.json();
-      if (data) {
-        userData = data;
-        loadPage();
-      } else {
-        window.location.href = "/#login";
-      }
-    } catch (error) {
-      console.error(
-        "❌ Erreur lors de la récupération de l'utilisateur :",
-        error
-      );
+});
+
+export async function fetchUserData() {
+  try {
+    const response = await fetch("https://localhost:8080/api/get-user");
+    const data = await response.json();
+    if (data) {
+      return data
+    } else {
       window.location.href = "/#login";
     }
+  } catch (error) {
+    console.error(
+      "❌ Erreur lors de la récupération de l'utilisateur :",
+      error
+    );
+    window.location.href = "/#login";
   }
-  await fetchUserData();
-});
+}

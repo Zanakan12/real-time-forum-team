@@ -7,11 +7,10 @@ document.addEventListener("DOMContentLoaded", function () {
               <div id="newpost-section">
                 <div id="error-messages"></div>
                 <div id="categories-container"></div>
-                  <label for="body">Post content:</label>
                   <input id="body" name="body" type="text" placeholder="tell us a story ..." required/>
                   <div class="file-upload">
                   <input type="file" id="image-upload" name="image" accept="image/*"/>
-                  <label for="image-upload">📷 Choisir une image</label>
+                  <label for="image-upload">📷</label>
                   <span class="file-name">Aucune image sélectionnée</span>
                   </div>
 
@@ -26,15 +25,16 @@ document.addEventListener("DOMContentLoaded", function () {
   checkContainer();
 });
 
-document.addEventListener("DOMContentLoaded", function () {
+const observer = new MutationObserver(() => {
   let fileInput = document.getElementById("image-upload");
-
-  if (fileInput) { // Vérifier si l'élément existe
+  if (fileInput) {
       fileInput.addEventListener("change", function() {
           let fileName = this.files.length > 0 ? this.files[0].name : "Aucune image sélectionnée";
           document.querySelector(".file-name").textContent = fileName;
       });
-  } else {
-      console.error("L'élément #image-upload n'existe pas !");
+      observer.disconnect(); // On arrête l'observation une fois l'élément trouvé
   }
 });
+
+observer.observe(document.body, { childList: true, subtree: true });
+

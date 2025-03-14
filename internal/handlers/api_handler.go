@@ -13,13 +13,17 @@ import (
 func GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	session := middlewares.GetCookie(w, r)
 	userName, err := db.DecryptData(session.Username)
+
+	role := session.Role
 	if err != nil {
 		fmt.Println("Erreur lors du décryptage de l'user")
 	}
 	user := struct {
-		Username string `json:"username"`
+		Username string `json:"username",omitempty"`
+		Role     string `json:"role",omitempty"`
 	}{
 		Username: userName,
+		Role:     role,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
