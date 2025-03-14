@@ -20,7 +20,7 @@ const routes = {
 };
 
 async function loadPage() {
-  const hash = window.location.hash.substring(1) || "home";
+  const hash = window.location.hash.substring(1) || "#home";
   const app = document.getElementById("app");
   app.innerHTML = ""; // On vide le contenu actuel
 
@@ -52,7 +52,26 @@ async function loadPage() {
 // Écoute les changements d'URL
 window.addEventListener("hashchange", loadPage);
 window.addEventListener("DOMContentLoaded", loadPage);
-window.addEventListener("DOMContentLoaded", () => {});
-//document.addEventListener("DOMContentLoaded", loadFooter);
 
-//appel des fonction handleErreur en cas d'erreur détectée
+window.addEventListener("DOMContentLoaded", async () => {
+  let userData;
+  async function fetchUserData() {
+    try {
+      const response = await fetch("https://localhost:8080/api/get-user");
+      const data = await response.json();
+      if (data) {
+        userData = data;
+        loadPage();
+      } else {
+        window.location.href = "/#login";
+      }
+    } catch (error) {
+      console.error(
+        "❌ Erreur lors de la récupération de l'utilisateur :",
+        error
+      );
+      window.location.href = "/#login";
+    }
+  }
+  await fetchUserData();
+});
