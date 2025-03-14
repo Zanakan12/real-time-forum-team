@@ -1,10 +1,6 @@
-let username = "rafta";
-
 export function homePage() {
   const div = document.createElement("div");
   div.innerHTML = `
-      <h4> ${username}, tell us a story...</h4>
-      
       <div id="newpost-container"></div>
       <div id="categories-selection-container"></div>
       <div id="lastposts-container"></div>

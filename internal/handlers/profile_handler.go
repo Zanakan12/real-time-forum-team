@@ -2,86 +2,70 @@ package handlers
 
 import (
 	"db"
-	"fmt"
-	"html/template"
+	"encoding/json"
 	"log"
 	"middlewares"
 	"net/http"
 )
 
 type ProfileData struct {
-	Username          string
-	UserRole          string
-	UserID            int
-	CreatedAt         string
-	MostRecentPosts   []db.Post
-	NotificationCount int
-	Error             string
-	Success           string
-	ShowUpdateForm    bool
-	CurrentPage       string
+	Success           bool      `json:"success"`
+	Username          string    `json:"username"`
+	UserRole          string    `json:"userRole"`
+	UserID            int       `json:"userID"`
+	CreatedAt         string    `json:"createdAt,omitempty"`
+	MostRecentPosts   []db.Post `json:"mostRecentPosts,omitempty"`
+	NotificationCount int       `json:"notificationCount"`
+	Error             string    `json:"error,omitempty"`
+	ShowUpdateForm    bool      `json:"showUpdateForm"`
 }
 
-// Fonction handler
+// Fonction handler pour retourner du JSON
 func ProfileHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json") // Indique qu'on envoie du JSON
+
 	session := middlewares.GetCookie(w, r)
 	if session.Username == "" {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		log.Println("Error fetching user from database")
+		http.Error(w, `{"success": false, "error": "Not authenticated"}`, http.StatusUnauthorized)
+		log.Println("Error: User not authenticated")
 		return
 	}
+
+	// Récupérer les notifications de l'utilisateur
 	notifications, _ := db.NotificationsSelect(session.UserID)
+
+	// Décrypter le nom d'utilisateur
 	userName, err := db.DecryptData(session.Username)
 	if err != nil {
-		http.Error(w, "Error on the Decrypt username", http.StatusNotFound)
-		log.Println("Error fetching username from database")
+		http.Error(w, `{"success": false, "error": "Error decrypting username"}`, http.StatusInternalServerError)
+		log.Println("Error decrypting username:", err)
 		return
 	}
+
+	// Récupérer les activités (posts récents)
 	activities, err := db.FilterUserPosts(session.UserID)
 	if err != nil {
-		fmt.Printf("error while getting user activity : %v", err)
-		http.Error(w, "Internal Server Error (Error executing template)", http.StatusInternalServerError)
+		log.Printf("Error fetching user posts: %v", err)
+		http.Error(w, `{"success": false, "error": "Internal Server Error"}`, http.StatusInternalServerError)
 		return
 	}
 	activities = countLikesDislikes(activities)
 
+	// Vérifier si l'utilisateur a demandé la mise à jour du profil
 	showUpdateForm := r.URL.Query().Get("update") == "true"
 
+	// Structurer les données à renvoyer en JSON
 	data := ProfileData{
+		Success:           true,
 		Username:          userName,
 		UserRole:          session.Role,
 		UserID:            session.UserID,
 		MostRecentPosts:   activities,
 		NotificationCount: countUnReadNotifications(notifications),
 		Error:             r.URL.Query().Get("error"),
-		Success:           r.URL.Query().Get("success"),
 		ShowUpdateForm:    showUpdateForm,
-		CurrentPage:       "profile",
 	}
 
-	tmpl, err := template.ParseFiles(
-		"web/pages/profile.html",
-		"web/templates/tmpl_nav.html",
-		"web/templates/tmpl_updateProfile.html",
-		"web/templates/tmpl_lastposts.html",
-		"web/templates/tmpl_newcomment.html",
-		"web/templates/tmpl_likes_dislikes.html",
-		"web/templates/tmpl_likes_dislikes_com.html",
-		"web/templates/tmpl_user_request.html",
-		"web/templates/tmpl_status_posts.html",
-	)
-
-	if err != nil {
-		http.Error(w, "Error loading template", http.StatusInternalServerError)
-		log.Println("Error parsing templates:", err)
-		return
-	}
-
-	// Rendu du template avec les données
-	err = tmpl.Execute(w, data)
-	if err != nil {
-		http.Error(w, "Error executing template", http.StatusInternalServerError)
-		log.Println("Error executing template:", err)
-		return
-	}
+	// Convertir en JSON et envoyer la réponse
+	json.NewEncoder(w).Encode(data)
 }
