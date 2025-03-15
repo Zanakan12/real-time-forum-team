@@ -21,6 +21,7 @@ func createMessagesTable(db *sql.DB) {
 	executeSQL(db, createTableSQL)
 }
 
+
 func GetMessages(username, recipient string) ([]WebSocketMessage, error) {
 	db := SetupDatabase()
 	defer db.Close()

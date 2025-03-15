@@ -46,7 +46,8 @@ func InitServer() {
 	server.Handle("/dis-login", handlers.HandleDiscordLogin)
 	server.Handle("/dis-callback", handlers.HandleDiscordCallback)
 	server.Handle("/notifications", handlers.NotificationsHandler)
-	http.HandleFunc("/upload", handlers.UploadHandler)
+	http.HandleFunc("/profile-data", handlers.ProfileHandler)
+	server.Handle("/upload-profile-image",handlers.UploadHandler)
 	// Errors
 	server.Handle("/404", handlers.Err404Handler)
 	server.Handle("/429", handlers.Err429Handler)
