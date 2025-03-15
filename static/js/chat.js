@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function checkChatButton() {
-    const openChatBtn = document.getElementById("chat-messages");
+    const openChatBtn = document.getElementById("open-chat");
     if (openChatBtn) {
       openChatBtn.addEventListener("click", (event) => {
         event.stopPropagation();

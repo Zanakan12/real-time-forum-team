@@ -4,12 +4,6 @@ import { homePage } from "/static/js/home.js";
 import { adminPanel } from "/static/js/admin.js";
 import { profilePage } from "/static/js/profile.js";
 import { showHiddenButton } from "/static/js/navbar.js";
-////import { loadPosts } from "/static/js/posts.js"
-
-//import { footerPage } from "/static/js/footer.js";
-//import { headerPage } from "/static/js/header.js";
-
-//import des pages d'erreurs
 
 //les routes pour les éléments
 const routes = {
