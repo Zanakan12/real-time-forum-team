@@ -15,8 +15,8 @@ const routes = {
 };
 
 async function loadPage(input) {
-  let redirection = input;
-  if(!input){
+  let redirection;
+  if(!input && !fetchUserData){
     redirection="login"
   }
   
@@ -26,7 +26,7 @@ async function loadPage(input) {
   app.innerHTML = ""; // On vide le contenu actuel
   let userData = await fetchUserData();
   if (userData.username) showHiddenButton(userData);
-
+  console.log("route pouri")
   console.log("Changement de page vers :", hash);
 
   if (routes[hash]) {
