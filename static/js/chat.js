@@ -1,35 +1,30 @@
 
+
 document.addEventListener("DOMContentLoaded", async () => {
   let socket;
   let username;
   let recipientSelect;
   let onlineUser;
 
-  function checkChatElements() {
-    const reduceBtn = document.getElementById("reduce-chat");
-    const closeBtn = document.getElementById("close-chat");
-    if (reduceBtn && closeBtn) {
-      reduceBtn.addEventListener("click", () => {
-        close("chat");
-        const chat = document.getElementById("chat-messages");
-        const bubbleBox = document.createElement("div");
-        bubbleBox.id = "bubble-box";
-        bubbleBox.classList.add("selectUser");
-        chat.appendChild(bubbleBox);
-        bubbleBox.addEventListener("click", (event) => {
-          handleUserSelection(event);
-          bubbleBox.remove();
-        });
-      });
+  const reduceBtn = document.getElementById("reduce-chat");
+  const closeBtn = document.getElementById("close-chat");
 
-      closeBtn.addEventListener("click", () => {
-        close("chat");
-      });
-    } else {
-      // Réessayer après 100ms
-    }
-  }
-  checkChatElements();
+  reduceBtn.addEventListener("click", () => {
+    close("chat");
+    const chat = document.getElementById("chat-messages");
+    const bubbleBox = document.createElement("div");
+    bubbleBox.id = "bubble-box";
+    bubbleBox.classList.add("selectUser");
+    chat.appendChild(bubbleBox);
+    document.getElementById("bubble-box").addEventListener("click", (event) => {
+      handleUserSelection(event);
+      bubbleBox.remove();
+    });
+  });
+
+  closeBtn.addEventListener("click", () => {
+    close("chat");
+  });
 
   // Fonction pour ouvrir la liste
   function open(arg) {
@@ -53,43 +48,27 @@ document.addEventListener("DOMContentLoaded", async () => {
     element.classList.add("hidden");
   }
 
-  function checkChatButton() {
-    const openChatBtn = document.getElementById("open-chat");
-    if (openChatBtn) {
-      openChatBtn.addEventListener("click", (event) => {
-        event.stopPropagation();
-        const element = document.getElementById("all-users");
-        open("all-users");
+  const openChatBtn = document.getElementById("open-chat");
+  // Gérer l'ouverture du chat
+  openChatBtn.addEventListener("click", (event) => {
+    event.stopPropagation(); // Empêche la propagation pour éviter la fermeture immédiate
+    const element = document.getElementById("all-users");
+    open("all-users");
+    // Gérer la fermeture du chat en cliquant à l'extérieur
+    document.addEventListener("click", (event) => {
+      if (!element.contains(event.target) && event.target !== openChatBtn) {
+        close("all-users");
+      }
+    });
+  });
 
-        // Gérer la fermeture du chat en cliquant à l'extérieur
-        document.addEventListener("click", (event) => {
-          if (!element.contains(event.target) && event.target !== openChatBtn) {
-            close("all-users");
-          }
-        });
-      });
-    } else {
-      console.warn(
-        "⚠️ L'élément #open-chat n'existe pas encore, nouvelle tentative..."
-      );
-    }
-  }
-  checkChatButton();
+  document
+    .getElementById("users-online")
+    .addEventListener("click", handleUserSelection);
 
-  function checkUserLists() {
-    const usersOnline = document.getElementById("users-online");
-    const usersOffline = document.getElementById("users-offline");
-
-    if (usersOnline && usersOffline) {
-      usersOnline.addEventListener("click", handleUserSelection);
-      usersOffline.addEventListener("click", handleUserSelection);
-    } else {
-      console.warn(
-        "⚠️ Les éléments #users-online ou #users-offline n'existent pas encore, nouvelle tentative..."
-      );
-    }
-  }
-  checkUserLists();
+  document
+    .getElementById("users-offline")
+    .addEventListener("click", handleUserSelection);
 
   function handleUserSelection(event) {
     if (event.target.classList.contains("selectUser")) {
@@ -122,68 +101,35 @@ document.addEventListener("DOMContentLoaded", async () => {
       "url('/static/assets/img/rafta74/profileImage.jpg')";
   }
 
-  function checkMessageInput() {
-    const messageInput = document.getElementById("message");
-    const sendMessageButton = document.getElementById("send-msg-button");
+  const messageInput = document.getElementById("message");
+  document
+    .getElementById("message")
+    .addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        document.getElementById("send-msg-button").click();
+      }
+    });
 
-    if (messageInput && sendMessageButton) {
-      messageInput.addEventListener("keydown", function (event) {
-        if (event.key === "Enter") {
-          sendMessageButton.click();
-        }
-      });
-      console.log("✅ Événement 'keydown' ajouté à #message !");
-    } else {
-      console.warn(
-        "⚠️ #message ou #send-msg-button n'existe pas encore, nouvelle tentative..."
-      );
-      // Réessaye après 100ms
+  document.getElementById("messages").addEventListener("scroll", function () {
+    if (this.scrollTop === 0) {
+      //loadOlderMessages(); // Fonction pour récupérer les anciens messages
     }
-  }
-  checkMessageInput();
-
-  function checkMessagesContainer() {
-    const messagesContainer = document.getElementById("messages");
-
-    if (messagesContainer) {
-      messagesContainer.addEventListener("scroll", function () {
-        if (this.scrollTop === 0) {
-          // loadOlderMessages(); // Fonction pour récupérer les anciens messages
-        }
-      });
-      console.log("✅ Événement 'scroll' ajouté à #messages !");
-    } else {
-      console.warn("⚠️ #messages n'existe pas encore, nouvelle tentative...");
-    }
-  }
-  checkMessagesContainer();
+  });
 
   /*function loadOlderMessages() {
-      const messagesList = document.getElementById("messages");
-  
-      for (let i = 0; i < 5; i++) {
-        // Simulation de chargement de 5 anciens messages
-        let oldMessage = document.createElement("li");
-        oldMessage.textContent = "Ancien message " + (i + 1);
-        oldMessage.classList.add("received");
-        messagesList.prepend(oldMessage);
-      }
-    }*/
+    const messagesList = document.getElementById("messages");
 
-  function checkSendMessageButton() {
-    const sendMessageButton = document.getElementById("send-msg-button");
-
-    if (sendMessageButton) {
-      sendMessageButton.addEventListener("click", () => sendMessage());
-      console.log("✅ Événement 'click' ajouté à #send-msg-button !");
-    } else {
-      console.warn(
-        "⚠️ #send-msg-button n'existe pas encore, nouvelle tentative..."
-      );
-      // Réessaye après 100ms
+    for (let i = 0; i < 5; i++) {
+      // Simulation de chargement de 5 anciens messages
+      let oldMessage = document.createElement("li");
+      oldMessage.textContent = "Ancien message " + (i + 1);
+      oldMessage.classList.add("received");
+      messagesList.prepend(oldMessage);
     }
-  }
-  checkSendMessageButton();
+  }*/
+
+  const sendMessageButton = document.getElementById("send-msg-button");
+  sendMessageButton.addEventListener("click", () => sendMessage());
 
   // Récupérer les infos utilisateur
   async function fetchUserData() {
@@ -212,7 +158,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       const response = await fetch(
         `https://localhost:8080/api/chat?recipient=${recipientSelect}`
       );
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+      if (!response.ok)
+        throw new Error(`HTTP error! Status: ${response.status}`);
 
       let messages = await response.json();
       messages = JSON.parse(messages);
@@ -244,7 +191,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Récupérer la liste des utilisateurs connectés
   async function fetchConnectedUsers() {
     try {
-      const response = await fetch("https://localhost:8080/api/users-connected");
+      const response = await fetch(
+        "https://localhost:8080/api/users-connected"
+      );
       const users = await response.json();
       onlineUser = await JSON.parse(users);
       updateUserList(await JSON.parse(users));
@@ -258,25 +207,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // input texte detection
   let typingTimer;
+  const TYPING_DELAY = 100; // Délai avant d'envoyer "typing"
 
-  function checkMessageInput() {
-    const TYPING_DELAY = 100;
-    const messageInput = document.getElementById("message");
+  messageInput.addEventListener("input", () => {
+    clearTimeout(typingTimer);
 
-    if (messageInput) {
-      messageInput.addEventListener("input", () => {
-        clearTimeout(typingTimer);
-        typingTimer = setTimeout(() => {
-          messageDetectInput();
-        }, TYPING_DELAY);
-      });
-      console.log("✅ Événement 'input' ajouté à #message !");
-    } else {
-      console.warn("⚠️ #message n'existe pas encore, nouvelle tentative...");
-      setTimeout(checkMessageInput, 100); // Réessaye après 100ms
-    }
-  }
-  checkMessageInput();
+    typingTimer = setTimeout(() => {
+      messageDetectInput();
+    }, TYPING_DELAY);
+  });
 
   function messageDetectInput() {
     if (socket.readyState === WebSocket.OPEN) {
@@ -323,7 +262,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Envoi de message
   function sendMessage() {
-    const messageInput = document.getElementById("message");
     const recipient = recipientSelect;
     const message = messageInput.value.trim();
     const date = new Date();
@@ -442,32 +380,44 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function fetchAllUsers() {
     try {
-      const response = await fetch("https://localhost:8080/api/all-user");
-      if (!response.ok) {
-        throw new Error("Erreur lors de la récupération des utilisateurs");
-      }
-      let filtredUser;
-      const users = await response.json();
-      console.log(users);
-
-      filtredUser = users.sort((a, b) => a.username.localeCompare(b.username));
-
-      // Affichage sur la page HTML (si nécessaire)
-      const userList = document.getElementById("users-offline");
-      userList.innerHTML = "";
-      filtredUser.forEach((user) => {
-        if (user.username !== username) {
-          const li = document.createElement("li");
-          li.classList.add("selectUser", "offline", "short");
-          li.id = `${user.Username}`;
-          li.style.setProperty("--before-content", `"${user.username}"`);
-          userList.appendChild(li);
+        const response = await fetch("https://localhost:8080/api/all-user");
+        if (!response.ok) {
+            throw new Error("Erreur lors de la récupération des utilisateurs");
         }
-      });
+
+        const users = await response.json();
+
+        // 🔍 Vérification des données récupérées
+        console.log("Données récupérées :", users);
+
+        // ⚠️ Filtrer les entrées invalides (undefined ou sans Username)
+        const validUsers = users.filter(user => user && user.username);
+
+        // 🔄 Trier uniquement les éléments valides
+        const filtredUser = validUsers.sort((a, b) =>
+            a.username.localeCompare(b.username)
+        );
+
+        // 🖥️ Mise à jour du DOM
+        const userList = document.getElementById("users-offline");
+        userList.innerHTML = "";
+
+        filtredUser.forEach((user) => {
+            if (user.username !== username) {
+                const li = document.createElement("li");
+                li.classList.add("selectUser", "offline", "short");
+                li.id = user.username;
+                li.style.setProperty("--before-content", `"${user.username}"`);
+                userList.appendChild(li);
+            }
+        });
+
     } catch (error) {
-      console.error("Erreur :", error);
+        console.error("Erreur :", error);
     }
-  }
+}
+
 
   console.log("🚀 - Page chargée !");
+  await fetchUserData();
 });
