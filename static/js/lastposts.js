@@ -19,7 +19,6 @@ document.addEventListener("DOMContentLoaded", function () {
           });
 
           const postElement = document.createElement("div");
-          postElement.classList.add("post");
           postElement.innerHTML = `
             <form id="form-${post.id}" action="/post-update-validation" method="post">
               <table class="post">
@@ -29,9 +28,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     <div class="username">${post.user.username}</div>
                   </td>
                   <td><span>${post.categories ? post.categories : ""}</span></td>
+                  <td> <button id="modif-post-${post.id}" type="button" class="modif-post">✏️ Modifier</button></td>
                 </tr>
                 <tr>
-                  <td colspan="3" class="written" style="font-style: italic; padding-bottom: 1.3rem;">
+                  <td colspan="3" class="written">
                     Posté le ${formattedDate}
                   </td>
                 </tr>
@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     <div id="textarea-container-${post.id}">
                       <div id="textarea-${post.id}" name="content">${post.body}</div>
                     </div>
-                    <button id="modif-post-${post.id}" type="button">✏️ Modifier</button>
+                    
                   </td>
                 </tr>
                 <tr>

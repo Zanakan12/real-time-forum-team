@@ -21,8 +21,11 @@ const routes = {
 };
 
 async function loadPage(input) {
-
-  const redirection = input;
+  let redirection = input;
+  if(!input){
+    redirection="login"
+  }
+  
   const hash = window.location.hash.substring(1) || redirection;
   console.log(hash)
   const app = document.getElementById("app");
@@ -59,6 +62,7 @@ async function loadPage(input) {
 window.addEventListener("hashchange", loadPage);
 
 window.addEventListener("DOMContentLoaded", async () => {
+  loadPage("login")
 });
 
 export async function fetchUserData() {
@@ -67,14 +71,11 @@ export async function fetchUserData() {
     const data = await response.json();
     if (data) {
       return data
-    } else {
-      window.location.href = "/#login";
     }
   } catch (error) {
     console.error(
       "❌ Erreur lors de la récupération de l'utilisateur :",
       error
     );
-    window.location.href = "/#login";
   }
 }

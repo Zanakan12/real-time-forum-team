@@ -2,43 +2,26 @@
 
 document.addEventListener("DOMContentLoaded", function () {
   const navHTML = `
-        <table id="nav">
-          <tr>
-            <td id="logo-container">
-              <a href="/#home" id="logo-link">
-                <img id="logo" src="/static/assets/img/4.png" width="100px" />
-              </a>
-            </td>
-            <td id="site-name">
-              <h2>mood.</h2>
-            </td>
-            <td id="spacer"></td>
-            <td >
-              <button onclick="window.location.href='#profile'" class="hidden" id="profile-button">Profile</button>
-            </td>
-            <td >
-              <button onclick="window.location.href='#notifications'" class="hidden" id="notifications-button">🔔</button>
-            </td>
-            <td ">
-              <button onclick="window.location.href='#login'" id="login-button" >Login</button>
-            </td>
-            <td>
-              <button onclick="window.location.href='#register'" id="register-button">Register</button>
-            </td>
-            <td >
-              <button onclick="window.location.href='#mod'" class="hidden" id="moderator-panel-button">Moderator Panel</button>
-            </td>
-            <td>
-              <button onclick="window.location.href='#admin'" class="hidden" id="admin-panel-button">Admin Panel</button>
-            </td>
-            <td>
-              <button class="hidden" id="chat-button">chat 💬</button>
-            </td>
-            <td >
-              <button onclick="window.location.href='/logout'" class="hidden" id="logout-button" >Logout</button>
-            </td>
-          </tr>
-        </table>
+        <nav id="nav">
+    <div id="logo-container">
+      <a href="/#home" id="logo-link">
+        <img id="logo" src="/static/assets/img/4.png" width="100px" />
+      </a>
+    </div>
+    <div id="site-name">
+      <h2>mood.</h2>
+    </div>
+    <div id="nav-buttons">
+      <button onclick="window.location.href='#profile'" class="hidden" id="profile-button">Profile</button>
+      <button onclick="window.location.href='#notifications'" class="hidden" id="notifications-button">🔔</button>
+      <button onclick="window.location.href='#login'" id="login-button">Login</button>
+      <button onclick="window.location.href='#register'" id="register-button">Register</button>
+      <button onclick="window.location.href='#mod'" class="hidden" id="moderator-panel-button">Moderator Panel</button>
+      <button onclick="window.location.href='#admin'" class="hidden" id="admin-panel-button">Admin Panel</button>
+      <button class="hidden" id="open-chat">chat 💬</button>
+      <button onclick="window.location.href='/logout'" class="hidden" id="logout-button">Logout</button>
+    </div>
+  </nav>
       `;
 
   const navContainer = document.getElementById("navstick");
@@ -50,7 +33,7 @@ export function showHiddenButton(userData) {
   const notificationsButton = document.getElementById("notifications-button");
   const moderatorPanelButton = document.getElementById("moderation-panel-button");
   const adminPanelButton = document.getElementById("admin-panel-button");
-  const chatButton = document.getElementById("chat-button");
+  const chatButton = document.getElementById("open-chat");
   const logoutButton = document.getElementById("logout-button");
 
   // ✅ Vérifie que userData existe et a une propriété "role"
