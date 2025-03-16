@@ -5,7 +5,6 @@ import { fetchUserData } from "/static/js/app.js";
 // Connexion WebSocket
 export async function connectWebSocket(username) {
   let socket
-  console.log("fucking username",username)
   socket = new WebSocket(`wss://localhost:8080/ws?username=${username}`);
 
   socket.onopen = () => {

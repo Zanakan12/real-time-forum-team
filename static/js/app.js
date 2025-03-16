@@ -17,7 +17,7 @@ const routes = {
 
 async function loadPage() {
   let redirection = "login";
-  const hash = window.location.hash.substring(1) || redirection;
+  let hash = window.location.hash.substring(1) || redirection;
   console.log("Changement de page vers :", hash);
 
   const app = document.getElementById("app");
@@ -25,10 +25,11 @@ async function loadPage() {
 
   let userData = await fetchUserData();
   if (userData && userData.username) {
-
+    if (hash === "login") hash="home"
     showHiddenButton(userData);
+    connectWebSocket(userData.usernames);
   }
-
+  
   if (routes[hash]) {
     try {
       const page = await routes[hash](); // Attendre la page
@@ -58,7 +59,7 @@ async function loadPage() {
 window.addEventListener("hashchange", loadPage);
 
 window.addEventListener("DOMContentLoaded", async () => {
- 
+  loadPage()
 });
 
 export async function fetchUserData() {
