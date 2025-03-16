@@ -1,10 +1,10 @@
-import { connectWebSocket } from "/static/js/websocket.js";
+
 import { fetchConnectedUsers } from "/static/js/websocket.js";
-document.addEventListener("DOMContentLoaded", async () => {
+import { fetchUserData } from "/static/js/app.js";
+export async function chatManage(usernam) {
   let socket;
-  let username;
   let recipientSelect;
-  
+  let user = await fetchUserData();
 
   const reduceBtn = document.getElementById("reduce-chat");
   const closeBtn = document.getElementById("close-chat");
@@ -99,7 +99,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const photochat = document.getElementById("photo-chat");
     photochat.style.backgroundImage =
-      "url('/static/assets/img/rafta74/profileImage.jpg')";
+      `url('/static/assets/img/${recipient}/profileImage.jpg')`;
   }
 
   const messageInput = document.getElementById("message");
@@ -132,23 +132,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const sendMessageButton = document.getElementById("send-msg-button");
   sendMessageButton.addEventListener("click", () => sendMessage());
 
-  // Récupérer les infos utilisateur
-  async function fetchUserData() {
-    try {
-      const response = await fetch("https://localhost:8080/api/get-user");
-      const data = await response.json();
-      if (data.username) {
-        username = data.username;
-        connectWebSocket();
-      }
-    } catch (error) {
-      console.error(
-        "❌ Erreur lors de la récupération de l'utilisateur :",
-        error
-      );
-    }
-  }
-
   // Récupérer les anciens messages
   async function fetchMessages(recipientSelect) {
     if (recipientSelect === undefined) return;
@@ -165,11 +148,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!Array.isArray(messages)) {
         return console.warn("⚠️ Aucun message disponible.");
       }
+      console.log("message:", messages)
       const messagesList = document.getElementById("messages");
       messagesList.innerHTML = "";
       messages.forEach((msg) => {
         let isSender = false;
-        if (msg.username === username) {
+        if (msg.username === user.username) {
           isSender = true;
         }
         appendMessage(
@@ -204,7 +188,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (socket.readyState === WebSocket.OPEN) {
       const typingObj = {
         type: "typing",
-        username: username,
+        username: user.username,
         recipient: recipientSelect,
       };
 
@@ -234,35 +218,36 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (socket.readyState === WebSocket.OPEN) {
       const msgObj = {
         type: "message",
-        username: username,
+        username: user.username,
         recipient: recipient,
         content: message,
         created_at: hour,
       };
       console.log(socket);
       socket.send(JSON.stringify(msgObj));
-      appendMessage("", username, recipient, message, hour, true); // Affichage immédiat
+      appendMessage("", user.username, recipient, message, hour, true); // Affichage immédiat
       messageInput.value = "";
     } else {
       alert("WebSocket non connecté !");
     }
   }
 
- 
+
 
   // Ajouter un message dans le chat
   function appendMessage(
     type,
-    username,
+    sender,
     recipient,
     content,
     createdAt,
     isSender
   ) {
     const messagesList = document.getElementById("messages");
-
     const li = document.createElement("li");
-
+    console.log(sender, "&&", user.username)
+    if (sender == user.username) isSender = true
+    else isSender = false;
     li.classList.add("message");
 
     if (li.classList.contains("message")) {
@@ -330,9 +315,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const users = await response.json();
 
-      // 🔍 Vérification des données récupérées
-      console.log("Données récupérées :", users);
-
       // ⚠️ Filtrer les entrées invalides (undefined ou sans Username)
       const validUsers = users.filter(user => user && user.username);
 
@@ -345,12 +327,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       const userList = document.getElementById("users-offline");
       userList.innerHTML = "";
 
-      filtredUser.forEach((user) => {
-        if (user.username !== username) {
+      filtredUser.forEach((users) => {
+        if (users.username !== user.username) {
           const li = document.createElement("li");
           li.classList.add("selectUser", "offline", "short");
-          li.id = user.username;
-          li.style.setProperty("--before-content", `"${user.username}"`);
+          li.id = users.username;
+          li.style.setProperty("--before-content", `"${users.username}"`);
           userList.appendChild(li);
         }
       });
@@ -362,5 +344,4 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
   console.log("🚀 - Page chargée !");
-  await fetchUserData();
-});
+};

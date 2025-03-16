@@ -5,6 +5,7 @@ import { adminPanel } from "/static/js/admin.js";
 import { profilePage } from "/static/js/profile.js";
 import { showHiddenButton } from "/static/js/navbar.js";
 import { connectWebSocket } from "/static/js/websocket.js";
+import { chatManage } from "/static/js/chat.js";
 
 //les routes pour les éléments
 const routes = {
@@ -25,11 +26,12 @@ async function loadPage() {
 
   let userData = await fetchUserData();
   if (userData && userData.username) {
-    if (hash === "login") hash="home"
+    if (hash === "login") hash = "home"
     showHiddenButton(userData);
     connectWebSocket(userData.usernames);
+    chatManage(userData.usernames);
   }
-  
+
   if (routes[hash]) {
     try {
       const page = await routes[hash](); // Attendre la page
