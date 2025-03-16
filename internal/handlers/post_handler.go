@@ -4,6 +4,7 @@ import (
 	"db"
 	"encoding/json"
 	"io"
+	"log"
 	"middlewares"
 	"mime/multipart"
 	"net/http"
@@ -60,7 +61,10 @@ func PostValidationHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Utilisateur non authentifié", http.StatusUnauthorized)
 		return
 	}
-
+	username,err := db.DecryptData(session.Username)
+	if err != nil{
+		log.Println("erreur lors du decryptage de l'username : ",err)
+	}
 	// Récupérer le texte du post
 	postBody := r.FormValue("body")
 	if strings.TrimSpace(postBody) == "" {
@@ -100,7 +104,7 @@ func PostValidationHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Définir le répertoire utilisateur
-		userDir := filepath.Join("./static/assets/img", session.Username)
+		userDir := filepath.Join("./static/assets/img", username)
 		if err := os.MkdirAll(userDir, os.ModePerm); err != nil {
 			http.Error(w, "Erreur lors de la création du dossier utilisateur", http.StatusInternalServerError)
 			return
@@ -127,7 +131,7 @@ func PostValidationHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Générer le chemin accessible via le web
-		imagePath = "/static/assets/img/" + session.Username + "/" + newFileName
+		imagePath = "/static/assets/img/" + username + "/" + newFileName
 
 		// Récupérer la taille de l'image
 		imageFileInfo, err := os.Stat(dstPath)
