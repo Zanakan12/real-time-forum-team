@@ -179,7 +179,6 @@ sendMessageButton.addEventListener("click", () => sendMessage());
 
 // Envoi de message
 async function sendMessage() {
-  const user = await fetchUserData();
   const recipient = recipientSelect;
   const message = messageInput.value.trim();
   const date = new Date();
