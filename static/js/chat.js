@@ -1,60 +1,69 @@
 
 import { fetchConnectedUsers } from "/static/js/websocket.js";
 import { fetchUserData } from "/static/js/app.js";
-export async function chatManage(usernam) {
-  let socket;
-  let recipientSelect;
-  let user = await fetchUserData();
+import { socket } from "/static/js/websocket.js";
 
-  const reduceBtn = document.getElementById("reduce-chat");
-  const closeBtn = document.getElementById("close-chat");
+let recipientSelect;
+const user = await fetchUserData();
 
-  reduceBtn.addEventListener("click", () => {
-    close("chat");
-    const chat = document.getElementById("chat-messages");
-    const bubbleBox = document.createElement("div");
-    bubbleBox.id = "bubble-box";
-    bubbleBox.classList.add("selectUser");
-    chat.appendChild(bubbleBox);
-    document.getElementById("bubble-box").addEventListener("click", (event) => {
-      handleUserSelection(event);
-      bubbleBox.remove();
-    });
+const reduceBtn = document.getElementById("reduce-chat");
+const closeBtn = document.getElementById("close-chat");
+
+reduceBtn.addEventListener("click", () => {
+  close("chat");
+  const chat = document.getElementById("chat-messages");
+  const bubbleBox = document.createElement("div");
+  bubbleBox.id = "bubble-box";
+  bubbleBox.classList.add("selectUser");
+  chat.appendChild(bubbleBox);
+  document.getElementById("bubble-box").addEventListener("click", (event) => {
+    handleUserSelection(event);
+    bubbleBox.remove();
   });
+});
 
-  closeBtn.addEventListener("click", () => {
-    close("chat");
-  });
+closeBtn.addEventListener("click", () => {
+  close("chat");
+});
 
-  // Fonction pour ouvrir la liste
-  function open(arg) {
-    const element = document.getElementById(arg);
-    if (element.classList.contains("hidden")) {
-      element.classList.remove("hidden"); // Ouvre la liste
-      fetchAllUsers();
+// Fonction pour ouvrir la liste
+function open(arg) {
+  const element = document.getElementById(arg);
+  if (element.classList.contains("hidden")) {
+    element.classList.remove("hidden"); // Ouvre la liste
+    fetchAllUsers();
 
-      fetchConnectedUsers();
-      if (element.classList.contains("all-users")) updateUserList();
-      if (element.classList.contains("chat")) fetchMessages(recipientSelect);
+    fetchConnectedUsers();
+    if (element.classList.contains("all-users")) updateUserList();
+    if (element.classList.contains("chat")) fetchMessages(recipientSelect);
 
-      console.log("Téléchargement des statuts des utilisateurs terminé !");
-    } else {
-      if (arg === "all-users") element.classList.add("hidden"); // Ferme la liste
-    }
+    console.log("Téléchargement des statuts des utilisateurs terminé !");
+  } else {
+    if (arg === "all-users") element.classList.add("hidden"); // Ferme la liste
   }
+}
 
-  // Fonction pour fermer la liste
-  function close(arg) {
-    const element = document.getElementById(arg);
-    element.classList.add("hidden");
-  }
+// Fonction pour fermer la liste
+function close(arg) {
+  const element = document.getElementById(arg);
+  element.classList.add("hidden");
+}
 
-  const openChatBtn = document.getElementById("open-chat");
+const openChatBtn = document.getElementById("open-chat");
+// Gérer l'ouverture du chat
+if (openChatBtn) {
   // Gérer l'ouverture du chat
   openChatBtn.addEventListener("click", (event) => {
-    event.stopPropagation(); // Empêche la propagation pour éviter la fermeture immédiate
+    event.stopPropagation(); // Empêche la fermeture immédiate
+
     const element = document.getElementById("all-users");
+    if (!element) {
+      console.error("❌ Erreur : #all-users introuvable !");
+      return;
+    }
+
     open("all-users");
+
     // Gérer la fermeture du chat en cliquant à l'extérieur
     document.addEventListener("click", (event) => {
       if (!element.contains(event.target) && event.target !== openChatBtn) {
@@ -62,286 +71,288 @@ export async function chatManage(usernam) {
       }
     });
   });
+} else {
+  console.warn("⚠️ L'élément #open-chat est introuvable !");
+};
 
-  document
-    .getElementById("users-online")
-    .addEventListener("click", handleUserSelection);
+document
+  .getElementById("users-online")
+  .addEventListener("click", handleUserSelection);
 
-  document
-    .getElementById("users-offline")
-    .addEventListener("click", handleUserSelection);
+document
+  .getElementById("users-offline")
+  .addEventListener("click", handleUserSelection);
 
-  function handleUserSelection(event) {
-    if (event.target.classList.contains("selectUser")) {
-      if (event.target.id !== "bubble-box") recipientSelect = event.target.id;
-      let isOnline = event.target.classList.contains("online");
+function handleUserSelection(event) {
+  if (event.target.classList.contains("selectUser")) {
+    if (event.target.id !== "bubble-box") recipientSelect = event.target.id;
+    let isOnline = event.target.classList.contains("online");
 
-      console.log(
-        `Utilisateur sélectionné : ${recipientSelect}, En ligne : ${isOnline}`
-      );
+    console.log(
+      `Utilisateur sélectionné : ${recipientSelect}, En ligne : ${isOnline}`
+    );
 
-      // Envoyer l'ID au backend Go
-      fetch(`/api/chat?recipient=${recipientSelect}`).catch((error) =>
-        console.error("Erreur lors de la récupération des messages :", error)
-      );
-      const messagesList = document.getElementById("messages");
-      messagesList.innerHTML = "";
-      open("chat");
-      manageHeader(recipientSelect);
-      fetchMessages(recipientSelect);
-      close("all-users");
-    }
+    // Envoyer l'ID au backend Go
+    fetch(`/api/chat?recipient=${recipientSelect}`).catch((error) =>
+      console.error("Erreur lors de la récupération des messages :", error)
+    );
+    const messagesList = document.getElementById("messages");
+    messagesList.innerHTML = "";
+    open("chat");
+    manageHeader(recipientSelect);
+    fetchMessages(recipientSelect);
+    close("all-users");
   }
+}
 
-  function manageHeader(recipient) {
-    const recipientLabel = document.getElementById("name-chat");
-    recipientLabel.textContent = `${recipient}`;
+function manageHeader(recipient) {
+  const recipientLabel = document.getElementById("name-chat");
+  recipientLabel.textContent = `${recipient}`;
 
-    const photochat = document.getElementById("photo-chat");
-    photochat.style.backgroundImage =
-      `url('/static/assets/img/${recipient}/profileImage.jpg')`;
-  }
+  const photochat = document.getElementById("photo-chat");
+  photochat.style.backgroundImage =
+    `url('/static/assets/img/${recipient}/profileImage.jpg')`;
+}
 
-  const messageInput = document.getElementById("message");
-  document
-    .getElementById("message")
-    .addEventListener("keydown", function (event) {
-      if (event.key === "Enter") {
-        document.getElementById("send-msg-button").click();
-      }
-    });
-
-  document.getElementById("messages").addEventListener("scroll", function () {
-    if (this.scrollTop === 0) {
-      //loadOlderMessages(); // Fonction pour récupérer les anciens messages
+const messageInput = document.getElementById("message");
+document
+  .getElementById("message")
+  .addEventListener("keydown", function (event) {
+    if (event.key === "Enter") {
+      document.getElementById("send-msg-button").click();
     }
   });
 
-  /*function loadOlderMessages() {
-    const messagesList = document.getElementById("messages");
+document.getElementById("messages").addEventListener("scroll", function () {
+  if (this.scrollTop === 0) {
+    //loadOlderMessages(); // Fonction pour récupérer les anciens messages
+  }
+});
 
-    for (let i = 0; i < 5; i++) {
-      // Simulation de chargement de 5 anciens messages
-      let oldMessage = document.createElement("li");
-      oldMessage.textContent = "Ancien message " + (i + 1);
-      oldMessage.classList.add("received");
-      messagesList.prepend(oldMessage);
-    }
-  }*/
+/*function loadOlderMessages() {
+  const messagesList = document.getElementById("messages");
 
-  const sendMessageButton = document.getElementById("send-msg-button");
-  sendMessageButton.addEventListener("click", () => sendMessage());
+  for (let i = 0; i < 5; i++) {
+    // Simulation de chargement de 5 anciens messages
+    let oldMessage = document.createElement("li");
+    oldMessage.textContent = "Ancien message " + (i + 1);
+    oldMessage.classList.add("received");
+    messagesList.prepend(oldMessage);
+  }
+}*/
 
-  // Récupérer les anciens messages
-  async function fetchMessages(recipientSelect) {
-    if (recipientSelect === undefined) return;
-    try {
-      const response = await fetch(
-        `https://localhost:8080/api/chat?recipient=${recipientSelect}`
-      );
-      if (!response.ok)
-        throw new Error(`HTTP error! Status: ${response.status}`);
 
-      let messages = await response.json();
-      messages = JSON.parse(messages);
+// Récupérer les anciens messages
 
-      if (!Array.isArray(messages)) {
-        return console.warn("⚠️ Aucun message disponible.");
-      }
-      console.log("message:", messages)
-      const messagesList = document.getElementById("messages");
-      messagesList.innerHTML = "";
-      messages.forEach((msg) => {
-        let isSender = false;
-        if (msg.username === user.username) {
-          isSender = true;
-        }
-        appendMessage(
-          msg.type,
-          msg.username,
-          msg.recipient,
-          msg.content,
-          msg.created_at,
-          isSender
-        );
-      });
-    } catch (error) {
-      console.error("❌ Erreur lors de la récupération des messages :", error);
-    }
+
+
+
+// input texte detection
+let typingTimer;
+const TYPING_DELAY = 100; // Délai avant d'envoyer "typing"
+
+messageInput.addEventListener("input", () => {
+  clearTimeout(typingTimer);
+
+  typingTimer = setTimeout(() => {
+    messageDetectInput();
+  }, TYPING_DELAY);
+});
+
+function messageDetectInput() {
+  if (socket.readyState === WebSocket.OPEN) {
+    const typingObj = {
+      type: "typing",
+      username: user.username,
+      recipient: recipientSelect,
+    };
+
+    socket.send(JSON.stringify(typingObj));
+    console.log("Typing envoyé :", typingObj);
+  } else {
+    console.warn("WebSocket non connecté !");
+  }
+}
+
+const sendMessageButton = document.getElementById("send-msg-button");
+sendMessageButton.addEventListener("click", () => sendMessage());
+
+// Envoi de message
+async function sendMessage() {
+  const user = await fetchUserData();
+  const recipient = recipientSelect;
+  const message = messageInput.value.trim();
+  const date = new Date();
+  const hour = `${String(date.getHours()).padStart(2, "0")}:${String(
+    date.getMinutes()
+  ).padStart(2, "0")}`;
+
+  if (!recipient || !message) {
+    alert("Veuillez entrer un destinataire et un message !");
+    return;
   }
 
+  if (socket.readyState === WebSocket.OPEN) {
+    const msgObj = {
+      type: "message",
+      username: user.username,
+      recipient: recipient,
+      content: message,
+      created_at: hour,
+    };
+
+    socket.send(JSON.stringify(msgObj));
+    appendMessage("", user.username, recipient, message, hour, true); // Affichage immédiat
+    messageInput.value = "";
+  } else {
+    alert("WebSocket non connecté !");
+  }
+}
 
 
-  // input texte detection
-  let typingTimer;
-  const TYPING_DELAY = 100; // Délai avant d'envoyer "typing"
 
-  messageInput.addEventListener("input", () => {
-    clearTimeout(typingTimer);
+// Ajouter un message dans le chat
+export function appendMessage(
+  type,
+  sender,
+  recipient,
+  content,
+  createdAt,
+  isSender
+) {
+  const messagesList = document.getElementById("messages");
+  const li = document.createElement("li");
 
-    typingTimer = setTimeout(() => {
-      messageDetectInput();
-    }, TYPING_DELAY);
-  });
+  if (sender == user.username) isSender = true
+  else isSender = false;
+  li.classList.add("message");
 
-  function messageDetectInput() {
-    if (socket.readyState === WebSocket.OPEN) {
-      const typingObj = {
-        type: "typing",
-        username: user.username,
-        recipient: recipientSelect,
-      };
-
-      socket.send(JSON.stringify(typingObj));
-      console.log("Typing envoyé :", typingObj);
+  if (li.classList.contains("message")) {
+    if (isSender) {
+      li.classList.add("sent");
     } else {
-      console.warn("WebSocket non connecté !");
+      li.classList.add("received");
     }
   }
 
+  let typingTimeout; // Variable pour stocker le timer
 
+  if (type === "typing") {
+    const checkTyping = document.getElementById("typing");
 
-  // Envoi de message
-  function sendMessage() {
-    const recipient = recipientSelect;
-    const message = messageInput.value.trim();
-    const date = new Date();
-    const hour = `${String(date.getHours()).padStart(2, "0")}:${String(
-      date.getMinutes()
-    ).padStart(2, "0")}`;
-
-    if (!recipient || !message) {
-      alert("Veuillez entrer un destinataire et un message !");
-      return;
-    }
-
-    if (socket.readyState === WebSocket.OPEN) {
-      const msgObj = {
-        type: "message",
-        username: user.username,
-        recipient: recipient,
-        content: message,
-        created_at: hour,
-      };
-      console.log(socket);
-      socket.send(JSON.stringify(msgObj));
-      appendMessage("", user.username, recipient, message, hour, true); // Affichage immédiat
-      messageInput.value = "";
-    } else {
-      alert("WebSocket non connecté !");
-    }
-  }
-
-
-
-  // Ajouter un message dans le chat
-  function appendMessage(
-    type,
-    sender,
-    recipient,
-    content,
-    createdAt,
-    isSender
-  ) {
-    const messagesList = document.getElementById("messages");
-    const li = document.createElement("li");
-    console.log(sender, "&&", user.username)
-    if (sender == user.username) isSender = true
-    else isSender = false;
-    li.classList.add("message");
-
-    if (li.classList.contains("message")) {
-      if (isSender) {
-        li.classList.add("sent");
-      } else {
-        li.classList.add("received");
-      }
-    }
-
-    let typingTimeout; // Variable pour stocker le timer
-
-    if (type === "typing") {
-      const checkTyping = document.getElementById("typing");
-
-      if (!checkTyping) {
-        // Si l'indicateur "typing" n'existe pas, on le crée
-        li.id = "typing";
-        li.innerHTML = `
+    if (!checkTyping) {
+      // Si l'indicateur "typing" n'existe pas, on le crée
+      li.id = "typing";
+      li.innerHTML = `
           <span class="dot">.</span>
           <span class="dot">.</span>
           <span class="dot">.</span>
         `;
-        messagesList.appendChild(li);
-        scrollToBottom("messages");
-      }
-
-      // Réinitialiser le timer pour éviter une suppression prématurée
-      clearTimeout(typingTimeout);
-      typingTimeout = setTimeout(() => {
-        const typingElement = document.getElementById("typing");
-        if (typingElement) typingElement.remove();
-      }, 2000); // Disparaît après 2 secondes si aucune nouvelle frappe
-    } else {
-      // Cas normal : afficher le message
-      li.innerHTML = `${content} <small>${createdAt}</small>`;
       messagesList.appendChild(li);
       scrollToBottom("messages");
     }
 
-    // Vérifier si l'utilisateur est en bas avant de scroller
-    let isScrolledToBottom =
-      messagesList.scrollHeight - messagesList.clientHeight <=
-      messagesList.scrollTop + 1;
+    // Réinitialiser le timer pour éviter une suppression prématurée
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+      const typingElement = document.getElementById("typing");
+      if (typingElement) typingElement.remove();
+    }, 1000); // Disparaît après 2 secondes si aucune nouvelle frappe
+  } else {
+    // Cas normal : afficher le message
+    li.innerHTML = `${content} <small>${createdAt}</small>`;
+    messagesList.appendChild(li);
+    scrollToBottom("messages");
+  }
 
-    if (isScrolledToBottom) {
-      messagesList.scrollTop = messagesList.scrollHeight; // Scroll en bas seulement si l'utilisateur est déjà en bas
+  // Vérifier si l'utilisateur est en bas avant de scroller
+  let isScrolledToBottom =
+    messagesList.scrollHeight - messagesList.clientHeight <=
+    messagesList.scrollTop + 1;
+
+  if (isScrolledToBottom) {
+    messagesList.scrollTop = messagesList.scrollHeight; // Scroll en bas seulement si l'utilisateur est déjà en bas
+  }
+}
+
+function scrollToBottom(arg) {
+  const chatBox = document.getElementById(arg);
+  chatBox.scrollTo({
+    top: chatBox.scrollHeight,
+    behavior: "smooth",
+  });
+}
+
+async function fetchAllUsers() {
+  try {
+    const response = await fetch("https://localhost:8080/api/all-user");
+    if (!response.ok) {
+      throw new Error("Erreur lors de la récupération des utilisateurs");
     }
-  }
 
-  function scrollToBottom(arg) {
-    const chatBox = document.getElementById(arg);
-    chatBox.scrollTo({
-      top: chatBox.scrollHeight,
-      behavior: "smooth",
-    });
-  }
+    const users = await response.json();
 
-  async function fetchAllUsers() {
-    try {
-      const response = await fetch("https://localhost:8080/api/all-user");
-      if (!response.ok) {
-        throw new Error("Erreur lors de la récupération des utilisateurs");
+    // ⚠️ Filtrer les entrées invalides (undefined ou sans Username)
+    const validUsers = users.filter(user => user && user.username);
+
+    // 🔄 Trier uniquement les éléments valides
+    const filtredUser = validUsers.sort((a, b) =>
+      a.username.localeCompare(b.username)
+    );
+
+    // 🖥️ Mise à jour du DOM
+    const userList = document.getElementById("users-offline");
+    userList.innerHTML = "";
+
+    filtredUser.forEach((users) => {
+      if (users.username !== user.username) {
+        const li = document.createElement("li");
+        li.classList.add("selectUser", "offline", "short");
+        li.id = users.username;
+        li.style.setProperty("--before-content", `"${users.username}"`);
+        userList.appendChild(li);
       }
+    });
 
-      const users = await response.json();
-
-      // ⚠️ Filtrer les entrées invalides (undefined ou sans Username)
-      const validUsers = users.filter(user => user && user.username);
-
-      // 🔄 Trier uniquement les éléments valides
-      const filtredUser = validUsers.sort((a, b) =>
-        a.username.localeCompare(b.username)
-      );
-
-      // 🖥️ Mise à jour du DOM
-      const userList = document.getElementById("users-offline");
-      userList.innerHTML = "";
-
-      filtredUser.forEach((users) => {
-        if (users.username !== user.username) {
-          const li = document.createElement("li");
-          li.classList.add("selectUser", "offline", "short");
-          li.id = users.username;
-          li.style.setProperty("--before-content", `"${users.username}"`);
-          userList.appendChild(li);
-        }
-      });
-
-    } catch (error) {
-      console.error("Erreur :", error);
-    }
+  } catch (error) {
+    console.error("Erreur :", error);
   }
+}
 
 
-  console.log("🚀 - Page chargée !");
-};
+export async function fetchMessages(recipientSelect) {
+  if (recipientSelect === undefined) return;
+  try {
+    const response = await fetch(
+      `https://localhost:8080/api/chat?recipient=${recipientSelect}`
+    );
+    if (!response.ok)
+      throw new Error(`HTTP error! Status: ${response.status}`);
+
+    let messages = await response.json();
+    messages = JSON.parse(messages);
+
+    if (!Array.isArray(messages)) {
+      return console.warn("⚠️ Aucun message disponible.");
+    }
+    console.log("message:", messages)
+    const messagesList = document.getElementById("messages");
+    messagesList.innerHTML = "";
+    messages.forEach((msg) => {
+      let isSender = false;
+      if (msg.username === user.username) {
+        isSender = true;
+      }
+      appendMessage(
+        msg.type,
+        msg.username,
+        msg.recipient,
+        msg.content,
+        msg.created_at,
+        isSender
+      );
+    });
+  } catch (error) {
+    console.error("❌ Erreur lors de la récupération des messages :", error);
+  }
+}

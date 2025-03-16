@@ -1,10 +1,11 @@
 
 import { fetchUserData } from "/static/js/app.js";
-
+import { appendMessage } from "/static/js/chat.js";
+export let socket;
 
 // Connexion WebSocket
 export async function connectWebSocket(username) {
-  let socket
+
   socket = new WebSocket(`wss://localhost:8080/ws?username=${username}`);
 
   socket.onopen = () => {
@@ -68,16 +69,16 @@ export async function fetchConnectedUsers() {
 
 
 // Mettre à jour la liste des utilisateurs connectés
-function updateUserList(users) {
+async function updateUserList(users) {
   console.log("👥 Mise à jour de la liste des utilisateurs :", users);
   const usersList = document.getElementById("users-online");
   usersList.innerHTML = "";
-
+  let username = await fetchUserData()
   users.forEach((user) => {
     const li = document.createElement("li");
     li.classList.add("selectUser", "online");
     li.id = `${user}`;
-    if (user === fetchUserData()) li.style.setProperty("--before-content", '"Vous"');
+    if (user === username.username) li.style.setProperty("--before-content", '"Vous"');
     else li.style.setProperty("--before-content", `"${user}"`);
     usersList.appendChild(li);
   });

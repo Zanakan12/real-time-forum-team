@@ -5,7 +5,6 @@ import { adminPanel } from "/static/js/admin.js";
 import { profilePage } from "/static/js/profile.js";
 import { showHiddenButton } from "/static/js/navbar.js";
 import { connectWebSocket } from "/static/js/websocket.js";
-import { chatManage } from "/static/js/chat.js";
 
 //les routes pour les éléments
 const routes = {
@@ -15,6 +14,11 @@ const routes = {
   admin: adminPanel,
   profile: profilePage,
 };
+
+// Vérifie si une connexion WebSocket existe déjà dans window
+if (!window.socket || window.socket.readyState !== WebSocket.OPEN) {
+  window.socket = null;
+}
 
 async function loadPage() {
   let redirection = "login";
@@ -26,19 +30,25 @@ async function loadPage() {
 
   let userData = await fetchUserData();
   if (userData && userData.username) {
-    if (hash === "login") hash = "home"
+    if (hash === "login") hash = "home";
     showHiddenButton(userData);
-    connectWebSocket(userData.usernames);
-    chatManage(userData.usernames);
+
+    // Vérifier si le WebSocket est déjà connecté, sinon le connecter
+    if (!window.socket || window.socket.readyState !== WebSocket.OPEN) {
+      window.socket = connectWebSocket(userData.username);
+      console.log("✅ WebSocket connecté !");
+    } else {
+      console.log("⚠️ WebSocket déjà actif, aucune nouvelle connexion.");
+    }
   }
 
   if (routes[hash]) {
     try {
-      const page = await routes[hash](); // Attendre la page
+      const page = await routes[hash]();
       console.log("Page retournée :", page);
 
       if (page instanceof Node) {
-        app.innerHTML = ""; // ✅ Double vérification
+        app.innerHTML = "";
         app.appendChild(page);
       } else {
         throw new Error("Le module retourné n'est pas un élément DOM !");
@@ -54,6 +64,7 @@ async function loadPage() {
     app.appendChild(homePage);
   }
 }
+
 
 // ensemble des fonctions d'erreurs
 

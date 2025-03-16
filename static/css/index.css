@@ -341,11 +341,21 @@ textarea {
 .photo-chat {
   width: 90px;
   height: 90px;
-  background-image: url("/static/assets/img/rafta74/profileImage.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   border-radius: 50%;
+  border: 1px solid black;
+}
+
+#photo-chat{
+  width: 60px;
+  height: 60px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 50%;
+  border: 1px solid black;
 }
 
 #name-chat {
