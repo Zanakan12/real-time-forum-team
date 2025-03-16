@@ -415,7 +415,6 @@ textarea {
 }
 
 #newpost-section {
-  display: flex;
   flex-direction: column;
   gap: 10px; /* Espacement entre les éléments */
   max-width: 400px; /* Largeur maximale */

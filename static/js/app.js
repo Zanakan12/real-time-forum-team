@@ -4,6 +4,7 @@ import { homePage } from "/static/js/home.js";
 import { adminPanel } from "/static/js/admin.js";
 import { profilePage } from "/static/js/profile.js";
 import { showHiddenButton } from "/static/js/navbar.js";
+import { connectWebSocket } from "/static/js/websocket.js";
 
 //les routes pour les éléments
 const routes = {
@@ -14,28 +15,28 @@ const routes = {
   profile: profilePage,
 };
 
-async function loadPage(input) {
-  let redirection;
-  if(!input && !fetchUserData){
-    redirection="login"
-  }
-  
+async function loadPage() {
+  let redirection = "login";
   const hash = window.location.hash.substring(1) || redirection;
-  console.log(hash)
-  const app = document.getElementById("app");
-  app.innerHTML = ""; // On vide le contenu actuel
-  let userData = await fetchUserData();
-  if (userData.username) showHiddenButton(userData);
-  console.log("route pouri")
   console.log("Changement de page vers :", hash);
+
+  const app = document.getElementById("app");
+  app.innerHTML = ""; // ⚠️ S'assurer que l'ancien contenu est bien supprimé
+
+  let userData = await fetchUserData();
+  if (userData && userData.username) {
+
+    showHiddenButton(userData);
+  }
 
   if (routes[hash]) {
     try {
-      const page = await routes[hash](); // ✅ On attend la page asynchrone
+      const page = await routes[hash](); // Attendre la page
       console.log("Page retournée :", page);
 
       if (page instanceof Node) {
-        app.appendChild(page); // ✅ Ajout uniquement si c'est un élément DOM
+        app.innerHTML = ""; // ✅ Double vérification
+        app.appendChild(page);
       } else {
         throw new Error("Le module retourné n'est pas un élément DOM !");
       }
@@ -46,6 +47,7 @@ async function loadPage(input) {
   } else {
     console.warn("Route inconnue, affichage de la page d'accueil.");
     const homePage = await routes["home"]();
+    app.innerHTML = "";
     app.appendChild(homePage);
   }
 }
@@ -56,7 +58,7 @@ async function loadPage(input) {
 window.addEventListener("hashchange", loadPage);
 
 window.addEventListener("DOMContentLoaded", async () => {
-  loadPage("login")
+ 
 });
 
 export async function fetchUserData() {

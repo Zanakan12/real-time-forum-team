@@ -1,10 +1,10 @@
-
-
+import { connectWebSocket } from "/static/js/websocket.js";
+import { fetchConnectedUsers } from "/static/js/websocket.js";
 document.addEventListener("DOMContentLoaded", async () => {
   let socket;
   let username;
   let recipientSelect;
-  let onlineUser;
+  
 
   const reduceBtn = document.getElementById("reduce-chat");
   const closeBtn = document.getElementById("close-chat");
@@ -32,6 +32,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (element.classList.contains("hidden")) {
       element.classList.remove("hidden"); // Ouvre la liste
       fetchAllUsers();
+
       fetchConnectedUsers();
       if (element.classList.contains("all-users")) updateUserList();
       if (element.classList.contains("chat")) fetchMessages(recipientSelect);
@@ -139,15 +140,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (data.username) {
         username = data.username;
         connectWebSocket();
-      } else {
-        window.location.href = "/#login";
       }
     } catch (error) {
       console.error(
         "❌ Erreur lors de la récupération de l'utilisateur :",
         error
       );
-      window.location.href = "/#login";
     }
   }
 
@@ -188,22 +186,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // Récupérer la liste des utilisateurs connectés
-  async function fetchConnectedUsers() {
-    try {
-      const response = await fetch(
-        "https://localhost:8080/api/users-connected"
-      );
-      const users = await response.json();
-      onlineUser = await JSON.parse(users);
-      updateUserList(await JSON.parse(users));
-    } catch (error) {
-      console.error(
-        "❌ Erreur lors de la récupération des utilisateurs connectés :",
-        error
-      );
-    }
-  }
+
 
   // input texte detection
   let typingTimer;
@@ -232,33 +215,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // Connexion WebSocket
-  function connectWebSocket() {
-    socket = new WebSocket(`wss://localhost:8080/ws?username=${username}`);
 
-    socket.onopen = () => {
-      console.log("✅ Connexion WebSocket établie !");
-      fetchConnectedUsers();
-    };
-
-    socket.addEventListener("message", (event) => {
-      try {
-        const message = JSON.parse(event.data); // Convertir en objet JavaScript
-        appendMessage(
-          message.type,
-          message.username,
-          message.recipient,
-          message.content,
-          message.created_at,
-          false
-        );
-        // Traiter le message comme nécessaire
-      } catch (error) {
-        console.error("Erreur lors de la réception du message :", error);
-      }
-    });
-    socket.onclose = () => console.warn("⚠️ Connexion WebSocket fermée.");
-  }
 
   // Envoi de message
   function sendMessage() {
@@ -291,21 +248,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // Mettre à jour la liste des utilisateurs connectés
-  function updateUserList(users) {
-    console.log("👥 Mise à jour de la liste des utilisateurs :", users);
-    const usersList = document.getElementById("users-online");
-    usersList.innerHTML = "";
-
-    users.forEach((user) => {
-      const li = document.createElement("li");
-      li.classList.add("selectUser", "online");
-      li.id = `${user}`;
-      if (user === username) li.style.setProperty("--before-content", '"Vous"');
-      else li.style.setProperty("--before-content", `"${user}"`);
-      usersList.appendChild(li);
-    });
-  }
+ 
 
   // Ajouter un message dans le chat
   function appendMessage(
@@ -380,42 +323,42 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function fetchAllUsers() {
     try {
-        const response = await fetch("https://localhost:8080/api/all-user");
-        if (!response.ok) {
-            throw new Error("Erreur lors de la récupération des utilisateurs");
+      const response = await fetch("https://localhost:8080/api/all-user");
+      if (!response.ok) {
+        throw new Error("Erreur lors de la récupération des utilisateurs");
+      }
+
+      const users = await response.json();
+
+      // 🔍 Vérification des données récupérées
+      console.log("Données récupérées :", users);
+
+      // ⚠️ Filtrer les entrées invalides (undefined ou sans Username)
+      const validUsers = users.filter(user => user && user.username);
+
+      // 🔄 Trier uniquement les éléments valides
+      const filtredUser = validUsers.sort((a, b) =>
+        a.username.localeCompare(b.username)
+      );
+
+      // 🖥️ Mise à jour du DOM
+      const userList = document.getElementById("users-offline");
+      userList.innerHTML = "";
+
+      filtredUser.forEach((user) => {
+        if (user.username !== username) {
+          const li = document.createElement("li");
+          li.classList.add("selectUser", "offline", "short");
+          li.id = user.username;
+          li.style.setProperty("--before-content", `"${user.username}"`);
+          userList.appendChild(li);
         }
-
-        const users = await response.json();
-
-        // 🔍 Vérification des données récupérées
-        console.log("Données récupérées :", users);
-
-        // ⚠️ Filtrer les entrées invalides (undefined ou sans Username)
-        const validUsers = users.filter(user => user && user.username);
-
-        // 🔄 Trier uniquement les éléments valides
-        const filtredUser = validUsers.sort((a, b) =>
-            a.username.localeCompare(b.username)
-        );
-
-        // 🖥️ Mise à jour du DOM
-        const userList = document.getElementById("users-offline");
-        userList.innerHTML = "";
-
-        filtredUser.forEach((user) => {
-            if (user.username !== username) {
-                const li = document.createElement("li");
-                li.classList.add("selectUser", "offline", "short");
-                li.id = user.username;
-                li.style.setProperty("--before-content", `"${user.username}"`);
-                userList.appendChild(li);
-            }
-        });
+      });
 
     } catch (error) {
-        console.error("Erreur :", error);
+      console.error("Erreur :", error);
     }
-}
+  }
 
 
   console.log("🚀 - Page chargée !");

@@ -16,11 +16,12 @@ func GetUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	role := session.Role
 	if err != nil {
-		fmt.Println("Erreur lors du décryptage de l'user")
+		fmt.Println("Erreur lors de la récupération du role, de l'users :", session)
 	}
+
 	user := struct {
-		Username string `json:"username",omitempty"`
-		Role     string `json:"role",omitempty"`
+		Username string `json:"username,omitempty"`
+		Role     string `json:"role,omitempty"`
 	}{
 		Username: userName,
 		Role:     role,

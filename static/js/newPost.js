@@ -10,10 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
                   <input id="body" name="body" type="text" placeholder="tell us a story ..." required/>
                   <div class="file-upload">
                   <input type="file" id="image-upload" name="image" accept="image/*"/>
-                  <label for="image-upload">📷</label>
-                  <span class="file-name">Aucune image sélectionnée</span>
-                  </div>
-
+                  <label for="image-upload">📷</label></div>
                 <input type="submit" value="Submit" />
               </div>
             </form>

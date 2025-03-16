@@ -201,6 +201,7 @@ func GetUserListJSON() string {
 	for username := range clients {
 		usernames = append(usernames, username)
 	}
+	log.Println("username",usernames)
 	usersJSON, _ := json.Marshal(usernames)
 	return string(usersJSON)
 }
