@@ -18,7 +18,8 @@ document.addEventListener("DOMContentLoaded", function () {
       <button onclick="window.location.href='#register'" id="register-button">Register</button>
       <button onclick="window.location.href='#mod'" class="hidden" id="moderator-panel-button">Moderator Panel</button>
       <button onclick="window.location.href='#admin'" class="hidden" id="admin-panel-button">Admin Panel</button>
-      <button class="hidden" id="open-chat">chat 💬</button>
+      <button class="hidden" id="open-chat">💬 <span id="notification-messages" class="notication-messages">0</span></button>
+      
       <button onclick="window.location.href='/logout'" class="hidden" id="logout-button">Logout</button>
     </div>
   </nav>

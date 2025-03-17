@@ -338,6 +338,7 @@ export async function fetchMessages(recipientSelect) {
     const messagesList = document.getElementById("messages");
     messagesList.innerHTML = "";
     messages.forEach((msg) => {
+
       let isSender = false;
       if (msg.username === user.username) {
         isSender = true;

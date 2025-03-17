@@ -5,31 +5,58 @@ export let socket;
 
 // Connexion WebSocket
 export async function connectWebSocket(username) {
+  if (socket && socket.readyState === WebSocket.OPEN) {
+    console.log("WebSocket déjà connecté.");
+    return;
+  }
 
   socket = new WebSocket(`wss://localhost:8080/ws?username=${username}`);
 
   socket.onopen = () => {
     console.log("✅ Connexion WebSocket établie !");
-    fetchConnectedUsers();
+    if (typeof fetchConnectedUsers === "function") {
+      fetchConnectedUsers();
+    }
   };
 
   socket.addEventListener("message", (event) => {
     try {
-      const message = JSON.parse(event.data); // Convertir en objet JavaScript
-      appendMessage(
-        message.type,
-        message.username,
-        message.recipient,
-        message.content,
-        message.created_at,
-        false
-      );
-      // Traiter le message comme nécessaire
+      const message = JSON.parse(event.data);
+      const notification = document.getElementById("notification-messages");
+      const chat = document.getElementById("chat");
+      let seen = chat && !chat.classList.contains("hidden");
+
+      if (seen) {
+        appendMessage(
+          message.type,
+          message.username,
+          message.recipient,
+          message.content,
+          message.created_at,
+          false
+        );
+      } else if (notification && message.type==="message") {
+        // Incrémenter la notification au lieu de mettre "1"
+        let count = parseInt(notification.textContent || "0", 10);
+        notification.textContent = count + 1;
+      }
     } catch (error) {
       console.error("Erreur lors de la réception du message :", error);
     }
   });
-  socket.onclose = () => console.warn("⚠️ Connexion WebSocket fermée.");
+
+  socket.onclose = (event) => {
+    console.warn("⚠️ Connexion WebSocket fermée.", event.reason);
+    setTimeout(() => {
+      console.log("🔄 Tentative de reconnexion...");
+      connectWebSocket(username);
+    }, 3000); // Tentative de reconnexion après 3 secondes
+  };
+
+  socket.onerror = (error) => {
+    console.error("❌ Erreur WebSocket :", error);
+    socket.close();
+  };
 }
 
 
@@ -74,7 +101,7 @@ async function updateUserList(users) {
   const usersList = document.getElementById("users-online");
   usersList.innerHTML = "";
   let username = await fetchUserData()
-  if(!username){
+  if (!username) {
     return
   }
   users.forEach((user) => {
