@@ -5,6 +5,8 @@ import { adminPanel } from "/static/js/admin.js";
 import { profilePage } from "/static/js/profile.js";
 import { showHiddenButton } from "/static/js/navbar.js";
 import { connectWebSocket } from "/static/js/websocket.js";
+import { fetchAndUpdatePosts } from "/static/js/lastposts.js";
+import { LoadAllPost } from "/static/js/newPost.js";
 
 //les routes pour les éléments
 const routes = {
@@ -29,11 +31,9 @@ async function loadPage() {
   app.innerHTML = ""; // ⚠️ S'assurer que l'ancien contenu est bien supprimé
 
   let userData = await fetchUserData();
-  console.log("what'is in userdata", userData)
   if (userData && userData.username) {
 
     if (hash === "login") hash = "home";
-
     showHiddenButton(userData);
 
     // Vérifier si le WebSocket est déjà connecté, sinon le connecter
@@ -44,7 +44,7 @@ async function loadPage() {
       console.log("⚠️ WebSocket déjà actif, aucune nouvelle connexion.");
     }
   }
-
+  console.log("hash before", hash)
   if (routes[hash]) {
     try {
       const page = await routes[hash]();
@@ -53,6 +53,10 @@ async function loadPage() {
       if (page instanceof Node) {
         app.innerHTML = "";
         app.appendChild(page);
+        if (hash == "home") {
+      LoadAllPost();
+      fetchAndUpdatePosts();
+    }
       } else {
         throw new Error("Le module retourné n'est pas un élément DOM !");
       }
@@ -69,15 +73,10 @@ async function loadPage() {
 }
 
 
-// ensemble des fonctions d'erreurs
-
 // Écoute les changements d'URL
 window.addEventListener("hashchange", loadPage);
 
-window.addEventListener("DOMContentLoaded", async () => {
-  console.log("casse les couilles")
-  await loadPage()
-});
+document.addEventListener("DOMContentLoaded", loadPage())
 
 export async function fetchUserData() {
   try {

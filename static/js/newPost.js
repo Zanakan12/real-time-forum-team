@@ -1,6 +1,6 @@
 import { fetchAndUpdatePosts } from "/static/js/lastposts.js";
 
-document.addEventListener("DOMContentLoaded", function () {
+export function LoadAllPost () {
   function checkContainer() {
     const newPostContainer = document.getElementById("newpost-container");
     if (newPostContainer) {
@@ -92,4 +92,4 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   checkContainer();
-});
+}

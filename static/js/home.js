@@ -1,3 +1,5 @@
+
+
 export function homePage() {
   const div = document.createElement("div");
   div.innerHTML = `
@@ -28,6 +30,5 @@ export function homePage() {
               </div>
       </div>
     `;
-
   return div;
 }

@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const navHTML = `
         <nav id="nav">
     <div id="logo-container">
-      <a href="/#home" id="logo-link">
+      <a href="/" id="logo-link">
         <img id="logo" src="/static/assets/img/4.png" width="100px" />
       </a>
     </div>
