@@ -267,11 +267,12 @@ textarea {
   background-position: center;
   border-radius: 50%;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  justify-content: left;
   position: relative;
-  text-align: center;
+  text-align: left;
   cursor: pointer;
+  color: red;
+  font-size: large;
 }
 
 .selectUser::after {

@@ -33,7 +33,7 @@ async function loadPage() {
   let userData = await fetchUserData();
   if (userData && userData.username) {
 
-    if (hash === "login") hash = "home";
+    if (hash === "login") window.location.href = "/";
     showHiddenButton(userData);
 
     // Vérifier si le WebSocket est déjà connecté, sinon le connecter
@@ -44,7 +44,7 @@ async function loadPage() {
       console.log("⚠️ WebSocket déjà actif, aucune nouvelle connexion.");
     }
   }
-  console.log("hash before", hash)
+  
   if (routes[hash]) {
     try {
       const page = await routes[hash]();
@@ -53,10 +53,10 @@ async function loadPage() {
       if (page instanceof Node) {
         app.innerHTML = "";
         app.appendChild(page);
-        if (hash == "home") {
-      LoadAllPost();
-      fetchAndUpdatePosts();
-    }
+        if (hash !== "login" || hash !== "register" ) {
+          LoadAllPost();
+          fetchAndUpdatePosts();
+        }
       } else {
         throw new Error("Le module retourné n'est pas un élément DOM !");
       }
@@ -66,9 +66,7 @@ async function loadPage() {
     }
   } else {
     console.warn("Route inconnue, affichage de la page d'accueil.");
-    const homePage = await routes["home"]();
-    app.innerHTML = "";
-    app.appendChild(homePage);
+    window.location.href = "/";
   }
 }
 

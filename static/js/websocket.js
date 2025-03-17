@@ -19,6 +19,7 @@ export async function connectWebSocket(username) {
     }
   };
 
+  //message reçu par le destinataire
   socket.addEventListener("message", (event) => {
     try {
       const message = JSON.parse(event.data);
@@ -35,10 +36,19 @@ export async function connectWebSocket(username) {
           message.created_at,
           false
         );
-      } else if (notification && message.type==="message") {
-        // Incrémenter la notification au lieu de mettre "1"
+      } else if (notification && message.type === "message") {
         let count = parseInt(notification.textContent || "0", 10);
         notification.textContent = count + 1;
+        console.log(message.username)
+        const notificationOnUserPhoto = document.getElementById(`${message.username}`);
+
+        if (notificationOnUserPhoto) {
+          let userNotifCount = parseInt(notificationOnUserPhoto.textContent || "0", 10);
+          notificationOnUserPhoto.textContent = userNotifCount + 1;
+        } else {
+          console.error("L'élément de notification pour l'utilisateur n'existe pas !");
+        }
+
       }
     } catch (error) {
       console.error("Erreur lors de la réception du message :", error);

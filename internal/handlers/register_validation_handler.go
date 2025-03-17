@@ -7,11 +7,6 @@ import (
 	"strings"
 )
 
-// Structure pour la réponse JSON
-type Response struct {
-	Success bool   `json:"success"`
-	Error   string `json:"error,omitempty"`
-}
 
 func RegisterValidationHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {

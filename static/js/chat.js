@@ -4,7 +4,9 @@ import { fetchUserData } from "/static/js/app.js";
 import { socket } from "/static/js/websocket.js";
 
 let recipientSelect;
-const user = await fetchUserData();
+
+const userData= await fetchUserData();;
+
 
 const reduceBtn = document.getElementById("reduce-chat");
 const closeBtn = document.getElementById("close-chat");
@@ -55,6 +57,12 @@ if (openChatBtn) {
   // Gérer l'ouverture du chat
   openChatBtn.addEventListener("click", (event) => {
     event.stopPropagation(); // Empêche la fermeture immédiate
+    const notificationOnUserPhoto = document.getElementById(`${message.username}`);
+
+    if (notificationOnUserPhoto) {
+      let userNotifCount = parseInt(notificationOnUserPhoto.textContent || "0", 10);
+      notificationOnUserPhoto.textContent = userNotifCount + 1;
+    }
 
     const element = document.getElementById("all-users");
     if (!element) {
@@ -163,7 +171,7 @@ function messageDetectInput() {
   if (socket.readyState === WebSocket.OPEN) {
     const typingObj = {
       type: "typing",
-      username: user.username,
+      username: userData.username,
       recipient: recipientSelect,
     };
 
@@ -194,14 +202,14 @@ async function sendMessage() {
   if (socket.readyState === WebSocket.OPEN) {
     const msgObj = {
       type: "message",
-      username: user.username,
+      username: userData.username,
       recipient: recipient,
       content: message,
       created_at: hour,
     };
 
     socket.send(JSON.stringify(msgObj));
-    appendMessage("", user.username, recipient, message, hour, true); // Affichage immédiat
+    appendMessage("", userData.username, recipient, message, hour, true); // Affichage immédiat
     messageInput.value = "";
   } else {
     alert("WebSocket non connecté !");
@@ -222,7 +230,7 @@ export function appendMessage(
   const messagesList = document.getElementById("messages");
   const li = document.createElement("li");
 
-  if (sender == user.username) isSender = true
+  if (sender == userData.username) isSender = true
   else isSender = false;
   li.classList.add("message");
 
@@ -292,7 +300,7 @@ async function fetchAllUsers() {
     const users = await response.json();
 
     // ⚠️ Filtrer les entrées invalides (undefined ou sans Username)
-    const validUsers = users.filter(user => user && user.username);
+    const validUsers = users.filter(user => user && userData.username);
 
     // 🔄 Trier uniquement les éléments valides
     const filtredUser = validUsers.sort((a, b) =>
@@ -304,7 +312,7 @@ async function fetchAllUsers() {
     userList.innerHTML = "";
 
     filtredUser.forEach((users) => {
-      if (users.username !== user.username) {
+      if (users.username !== userData.username) {
         const li = document.createElement("li");
         li.classList.add("selectUser", "offline", "short");
         li.id = users.username;
@@ -340,7 +348,7 @@ export async function fetchMessages(recipientSelect) {
     messages.forEach((msg) => {
 
       let isSender = false;
-      if (msg.username === user.username) {
+      if (msg.username === userData.username) {
         isSender = true;
       }
       appendMessage(

@@ -3,7 +3,7 @@ export function fetchAndUpdatePosts(postsContainer) {
   fetch("/?format=json")
     .then((response) => response.json())
     .then((data) => {
-      console.log("📩 Données reçues :", data.mostRecentPosts);
+      //console.log("📩 Données reçues :", data.mostRecentPosts);
 
       postsContainer.innerHTML = ""; // ✅ Vide le contenu actuel uniquement si l'élément existe
 
@@ -17,7 +17,6 @@ export function fetchAndUpdatePosts(postsContainer) {
           minute: "2-digit",
           timeZone: "UTC",
         });
-        console.log("post contain", post)
         appendPost(post, formattedDate, postsContainer)
 
         // Gestion de la modification du post
@@ -180,26 +179,26 @@ export function appendPost(post, formattedDate, postsContainer) {
 }
 
 
-  document.querySelectorAll(".like-button, .dislike-button").forEach(button => {
-    button.addEventListener("click", (event) => {
-      event.preventDefault();
-      const form = button.closest("form");
-      const formData = new FormData(form);
+document.querySelectorAll(".like-button, .dislike-button").forEach(button => {
+  button.addEventListener("click", (event) => {
+    event.preventDefault();
+    const form = button.closest("form");
+    const formData = new FormData(form);
 
-      fetch("/likes-dislikes-validation", {
-        method: "POST",
-        body: formData
-      })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            const counter = form.querySelector("span");
-            counter.textContent = data.newCount;
-          } else {
-            alert("Error updating like/dislike");
-          }
-        });
-    });
+    fetch("/likes-dislikes-validation", {
+      method: "POST",
+      body: formData
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          const counter = form.querySelector("span");
+          counter.textContent = data.newCount;
+        } else {
+          alert("Error updating like/dislike");
+        }
+      });
+  });
 
   const commentForm = document.querySelector("#comment-form");
   if (commentForm) { // Vérifie si le formulaire existe

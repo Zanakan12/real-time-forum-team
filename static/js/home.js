@@ -22,7 +22,7 @@ export function homePage() {
                     <div id="close-chat">x</div>
                   </div>
                   <ul id="messages"></ul>
-
+                  
                   <div id="chat-input-container">
                       <input id="message-input" type="text" placeholder="Écrivez un message">
                       <input id="send-msg-button" type="button">
