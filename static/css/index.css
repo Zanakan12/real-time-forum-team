@@ -73,11 +73,32 @@ textarea {
 
 .post {
   width: 700px;
+  margin-top: 3rem;
+}
+
+#post-format {
+  width: 700px;
   background-color: rgb(37, 37, 37);
-  text-align: justify;
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.2);
   border-radius: 10px;
-  margin-top: 3rem;
+  margin-top: 10px;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.2);
+}
+
+.likesbuttons {
+  display: flex;
+  align-items: center;
+  justify-content: right;
+}
+
+#comment-input {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#content {
+  width: 50%;
 }
 
 .username {
@@ -117,7 +138,6 @@ textarea {
   gap: 10px;
   margin-left: 1000px;
 }
-
 
 .spacer {
   width: 100%;
@@ -348,7 +368,7 @@ textarea {
   border: 1px solid black;
 }
 
-#photo-chat{
+#photo-chat {
   width: 60px;
   height: 60px;
   background-size: cover;

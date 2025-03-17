@@ -74,6 +74,9 @@ async function updateUserList(users) {
   const usersList = document.getElementById("users-online");
   usersList.innerHTML = "";
   let username = await fetchUserData()
+  if(!username){
+    return
+  }
   users.forEach((user) => {
     const li = document.createElement("li");
     li.classList.add("selectUser", "online");

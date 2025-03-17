@@ -17,7 +17,7 @@ export function fetchAndUpdatePosts(postsContainer) {
           minute: "2-digit",
           timeZone: "UTC",
         });
-
+        console.log("post contain", post)
         appendPost(post, formattedDate, postsContainer)
 
         // Gestion de la modification du post
@@ -102,6 +102,7 @@ if (postsContainer) {
 
 export function appendPost(post, formattedDate, postsContainer) {
   const postElement = document.createElement("div");
+  postElement.id = "post-format"
   postElement.innerHTML = `
             <form id="form-${post.id}" action="/post-update-validation" method="post">
               <table class="post">
@@ -134,12 +135,99 @@ export function appendPost(post, formattedDate, postsContainer) {
                 </tr>
                 <td class="post-status" style="font-style: italic;">Status: ${post.status}</td>
               </table>
-            </form>
-            <form action="/post-delete-validation" method="post" style="display: inline;">
+              <form action="/post-delete-validation" method="post" style="display: inline;">
               <input type="hidden" name="post_id" value="${post.id}">
               <button type="submit">🗑️</button>
             </form>
+            <div class="likesbuttons">
+          <form class="like-form" data-id="${post.id}" data-type="like">
+              <button type="button" class="like-button" style="background: none; border: none; cursor: pointer;">
+                  <span>${post.likes_count}</span>
+                  <img src="/static/assets/img/like.png" alt="Like" style="width: 15px; vertical-align: middle;">
+              </button>
+          </form>
+          <form class="dislike-form" data-id="${post.id}" data-type="dislike">
+              <button type="button" class="dislike-button" style="background: none; border: none; cursor: pointer;">
+                  <span>${post.dislikes_count}</span>
+                  <img src="/static/assets/img/dislike.png" alt="Dislike" style="width: 15px; vertical-align: middle;">
+              </button>
+          </form>
+      </div>
+      <tr id="comment-row-${post.id}">
+    <td colspan="2">
+        <form action="/comment-update-validation" method="post" class="hidden">
+            <input type="hidden" name="comment_id" value="${post}">
+            <div id="textarea-${post.id}}" name="content" rows="" cols="">${post.comment}</div>
+            <button type="submit">✏️</button>
+        </form>
+        <form action="/comment-delete-validation" method="post" style="text-align: right;" class="hidden">
+            <input type="hidden" name="comment_id" value="${post.id}">
+            <button type="submit">🗑️</button>
+        </form>
+    </td>
+</tr>
+      <form id="comment-input"action="/comment-validation" method="post">
+        <input type="hidden" name="post_id" value="${post.id}">
+        
+            <input id="content" name="content" type="text" placeholder="Make a comment here ..." required></input>
+            <input type="submit" value="Send">
+        
+        </form>
+        </form>      
           `;
 
   postsContainer.appendChild(postElement);
 }
+
+
+  document.querySelectorAll(".like-button, .dislike-button").forEach(button => {
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      const form = button.closest("form");
+      const formData = new FormData(form);
+
+      fetch("/likes-dislikes-validation", {
+        method: "POST",
+        body: formData
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            const counter = form.querySelector("span");
+            counter.textContent = data.newCount;
+          } else {
+            alert("Error updating like/dislike");
+          }
+        });
+    });
+
+  const commentForm = document.querySelector("#comment-form");
+  if (commentForm) { // Vérifie si le formulaire existe
+    commentForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const formData = new FormData(commentForm);
+
+      fetch("/comment-validation", {
+        method: "POST",
+        body: formData
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            const commentList = document.querySelector("#comment-list");
+            if (commentList) {
+              const newComment = document.createElement("tr");
+              newComment.innerHTML = `<td>${data.comment}</td><td>${data.date}</td>`;
+              commentList.appendChild(newComment);
+            }
+            commentForm.reset();
+          } else {
+            alert("Error submitting comment");
+          }
+        });
+    });
+  }
+});
+
+
+

@@ -29,8 +29,11 @@ async function loadPage() {
   app.innerHTML = ""; // ⚠️ S'assurer que l'ancien contenu est bien supprimé
 
   let userData = await fetchUserData();
+  console.log("what'is in userdata", userData)
   if (userData && userData.username) {
+
     if (hash === "login") hash = "home";
+
     showHiddenButton(userData);
 
     // Vérifier si le WebSocket est déjà connecté, sinon le connecter
@@ -72,7 +75,8 @@ async function loadPage() {
 window.addEventListener("hashchange", loadPage);
 
 window.addEventListener("DOMContentLoaded", async () => {
-  loadPage()
+  console.log("casse les couilles")
+  await loadPage()
 });
 
 export async function fetchUserData() {
