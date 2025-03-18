@@ -94,43 +94,50 @@ func UserExists(email, username string) (bool, error) {
 }
 
 // LoginUser authentifie un utilisateur en vérifiant ses identifiants.
-func UserSelectLogin(email, password string) (User, error) {
+func UserSelectLogin(identifier, password string) (User, error) {
 	db := SetupDatabase()
 	defer db.Close()
 	users, _ := UserSelect(db)
+
 	emailExists := false
 	cryptedEmail := ""
+
+	// Vérifier si l'identifier est un email chiffré
 	for _, user := range users {
 		decryptedEmail, _ := DecryptData(user.Email)
-		if decryptedEmail == email {
+		decryptedUsername, _ := DecryptData(user.Username)
+		if (decryptedEmail == identifier) || (decryptedUsername == identifier) {
 			emailExists = true
 			cryptedEmail = user.Email
 			break
 		}
 	}
-	if !emailExists {
-		return User{}, fmt.Errorf("Invalid email.")
-	}
+
 	tx, err := db.Begin()
 	if err != nil {
 		return User{}, fmt.Errorf("error starting transaction: %v", err)
 	}
 
-	// Encrypt the email for lookup
-	/*
-		encryptedEmail, err := EncryptData(email)
-		if err != nil {
-			return User{}, fmt.Errorf("error encrypting email: %v", err)
-		}*/
-
-	// Récupérer l'utilisateur de la base de données
+	// Déterminer le champ de recherche (email ou username)
 	var user User
-	querySQL := `SELECT id, username, password, role FROM users WHERE email = ?`
-	err = db.QueryRow(querySQL, cryptedEmail).Scan(&user.ID, &user.Username, &user.Password, &user.Role)
+	var querySQL string
+	var queryArgs []interface{}
+
+	if emailExists {
+		// Si c'est un email, on utilise l'email chiffré
+		querySQL = `SELECT id, username, password, role FROM users WHERE email = ?`
+		queryArgs = append(queryArgs, cryptedEmail)
+	} else {
+		// Sinon, c'est un username
+		querySQL = `SELECT id, username, password, role FROM users WHERE username = ?`
+		queryArgs = append(queryArgs, identifier)
+	}
+
+	err = db.QueryRow(querySQL, queryArgs...).Scan(&user.ID, &user.Username, &user.Password, &user.Role)
 	if err != nil {
 		tx.Rollback()
 		if err == sql.ErrNoRows {
-			return User{}, fmt.Errorf("Wrong email.")
+			return User{}, fmt.Errorf("Identifiants incorrects.")
 		}
 		return User{}, fmt.Errorf("error executing statement: %v", err)
 	}
