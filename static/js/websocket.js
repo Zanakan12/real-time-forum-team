@@ -1,6 +1,5 @@
 
 import { fetchUserData } from "/static/js/app.js";
-import { appendMessage } from "/static/js/chat.js";
 export let socket;
 
 // Connexion WebSocket
@@ -18,42 +17,6 @@ export async function connectWebSocket(username) {
       fetchConnectedUsers();
     }
   };
-
-  //message reçu par le destinataire
-  socket.addEventListener("message", (event) => {
-    try {
-      const message = JSON.parse(event.data);
-      const notification = document.getElementById("notification-messages");
-      const chat = document.getElementById("chat");
-      let seen = chat && !chat.classList.contains("hidden");
-
-      if (seen) {
-        appendMessage(
-          message.type,
-          message.username,
-          message.recipient,
-          message.content,
-          message.created_at,
-          false
-        );
-      } else if (notification && message.type === "message") {
-        let count = parseInt(notification.textContent || "0", 10);
-        notification.textContent = count + 1;
-        console.log(message.username)
-        const notificationOnUserPhoto = document.getElementById(`${message.username}`);
-
-        if (notificationOnUserPhoto) {
-          let userNotifCount = parseInt(notificationOnUserPhoto.textContent || "0", 10);
-          notificationOnUserPhoto.textContent = userNotifCount + 1;
-        } else {
-          console.error("L'élément de notification pour l'utilisateur n'existe pas !");
-        }
-
-      }
-    } catch (error) {
-      console.error("Erreur lors de la réception du message :", error);
-    }
-  });
 
   socket.onclose = (event) => {
     console.warn("⚠️ Connexion WebSocket fermée.", event.reason);

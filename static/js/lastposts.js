@@ -5,8 +5,10 @@ export function fetchAndUpdatePosts(postsContainer) {
     .then((data) => {
       //console.log("📩 Données reçues :", data.mostRecentPosts);
 
-      postsContainer.innerHTML = ""; // ✅ Vide le contenu actuel uniquement si l'élément existe
-
+      if (!postsContainer) {
+        return
+      } // ✅ Vide le contenu actuel uniquement si l'élément existe
+      postsContainer.innerHTML = ""; // ✅ Vide seulement si l'élément existe
       data.mostRecentPosts.forEach((post) => {
         const dateObj = new Date(post.created_at);
         const formattedDate = dateObj.toLocaleString("fr-FR", {

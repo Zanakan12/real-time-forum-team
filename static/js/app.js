@@ -7,6 +7,7 @@ import { showHiddenButton } from "/static/js/navbar.js";
 import { connectWebSocket } from "/static/js/websocket.js";
 import { fetchAndUpdatePosts } from "/static/js/lastposts.js";
 import { LoadAllPost } from "/static/js/newPost.js";
+import { chatManager } from "/static/js/chat.js";
 
 //les routes pour les éléments
 const routes = {
@@ -32,10 +33,10 @@ async function loadPage() {
 
   let userData = await fetchUserData();
   if (userData && userData.username) {
-
-    if (hash === "login") window.location.href = "/";
+    
+    if (hash === "login") hash = "home";
     showHiddenButton(userData);
-
+    chatManager(userData);
     // Vérifier si le WebSocket est déjà connecté, sinon le connecter
     if (!window.socket || window.socket.readyState !== WebSocket.OPEN) {
       window.socket = connectWebSocket(userData.username);
@@ -44,7 +45,7 @@ async function loadPage() {
       console.log("⚠️ WebSocket déjà actif, aucune nouvelle connexion.");
     }
   }
-  
+  console.log("hash before", hash)
   if (routes[hash]) {
     try {
       const page = await routes[hash]();
@@ -53,7 +54,7 @@ async function loadPage() {
       if (page instanceof Node) {
         app.innerHTML = "";
         app.appendChild(page);
-        if (hash !== "login" || hash !== "register" ) {
+        if (hash == "home") {
           LoadAllPost();
           fetchAndUpdatePosts();
         }
@@ -66,7 +67,9 @@ async function loadPage() {
     }
   } else {
     console.warn("Route inconnue, affichage de la page d'accueil.");
-    window.location.href = "/";
+    const homePage = await routes["home"]();
+    app.innerHTML = "";
+    app.appendChild(homePage);
   }
 }
 
