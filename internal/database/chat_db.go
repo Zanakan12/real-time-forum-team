@@ -21,12 +21,13 @@ func createMessagesTable(db *sql.DB) {
 	executeSQL(db, createTableSQL)
 }
 
+
 func GetMessages(username, recipient string) ([]WebSocketMessage, error) {
 	db := SetupDatabase()
 	defer db.Close()
 
 	// ✅ Correction de la requête SQL pour récupérer les messages dans les deux sens
-	query := `SELECT username, content, created_at
+	query := `SELECT username,recipient, content, created_at
 	          FROM messages 
 	          WHERE (username = ? AND recipient = ?) 
 	          OR (username = ? AND recipient = ?) 
@@ -40,7 +41,7 @@ func GetMessages(username, recipient string) ([]WebSocketMessage, error) {
 	var messages []WebSocketMessage
 	for rows.Next() {
 		var msg WebSocketMessage
-		err := rows.Scan(&msg.Username, &msg.Content, &msg.CreatedAt)
+		err := rows.Scan(&msg.Username,&msg.Recipient, &msg.Content, &msg.CreatedAt)
 		if err != nil {
 			return nil, err
 		}

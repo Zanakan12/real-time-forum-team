@@ -2,15 +2,17 @@ package handlers
 
 import (
 	"db"
+	"encoding/json"
 	"io"
+	"log"
 	"middlewares"
 	"mime/multipart"
 	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // Fonction pour vérifier le type d'image
@@ -19,7 +21,6 @@ func isValidImageType(header *multipart.FileHeader) bool {
 		"image/jpeg": true,
 		"image/png":  true,
 		"image/gif":  true,
-		"image/bim":  true,
 	}
 
 	// Ouvrir le fichier pour lire le type MIME
@@ -39,22 +40,40 @@ func isValidImageType(header *multipart.FileHeader) bool {
 	return allowedTypes[fileType]
 }
 
-// PostValidationHandler handles the validation and insertion of a post
+// Structure pour la réponse JSON
+type PostResponse struct {
+	Success bool   `json:"success"`
+	Error   string `json:"error,omitempty"`
+	PostID  int    `json:"post_id,omitempty"`
+	Image   string `json:"image,omitempty"`
+}
+
+// PostValidationHandler gère l'insertion d'un post
 func PostValidationHandler(w http.ResponseWriter, r *http.Request) {
-	// Check if the method is POST
+	// Vérifier la méthode POST
 	if r.Method != http.MethodPost {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
-	session := middlewares.GetCookie(w, r)
-	if session.Username == "" {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
 		return
 	}
 
-	// Retrieve the form data submitted
-	postBody := r.FormValue("body") // User ID from form
-	title := makeTitle(postBody)    // Post title --- first three letters of the body
+	session := middlewares.GetCookie(w, r)
+	if session.Username == "" {
+		http.Error(w, "Utilisateur non authentifié", http.StatusUnauthorized)
+		return
+	}
+	username,err := db.DecryptData(session.Username)
+	if err != nil{
+		log.Println("erreur lors du decryptage de l'username : ",err)
+	}
+	// Récupérer le texte du post
+	postBody := r.FormValue("body")
+	if strings.TrimSpace(postBody) == "" {
+		http.Error(w, "Le champ 'body' est requis", http.StatusBadRequest)
+		return
+	}
+
+	// Générer un titre automatique
+	title := makeTitle(postBody)
 
 	// Récupérer les catégories sélectionnées
 	selectedMoods := r.Form["moods"]
@@ -64,6 +83,7 @@ func PostValidationHandler(w http.ResponseWriter, r *http.Request) {
 		categories = append(categories, category)
 	}
 
+	// Initialiser l'upload d'image
 	var imagePath string
 	var fileSize int
 
@@ -72,46 +92,51 @@ func PostValidationHandler(w http.ResponseWriter, r *http.Request) {
 		defer file.Close()
 
 		// Vérifier la taille du fichier
-		if header.Size > 20*1024*1024 { // 20 Mo en octets
-			errorMsg := url.QueryEscape("Img size > 20mb")
-			http.Redirect(w, r, "/?error="+errorMsg, http.StatusSeeOther)
+		if header.Size > 20*1024*1024 { // 20 Mo
+			http.Error(w, "L'image dépasse 20 Mo", http.StatusRequestEntityTooLarge)
 			return
 		}
 
 		// Vérifier le type de l'image
 		if !isValidImageType(header) {
-			errorMsg := url.QueryEscape("Img invalid extension")
-			http.Redirect(w, r, "/?error="+errorMsg, http.StatusSeeOther)
+			http.Error(w, "Format d'image non valide", http.StatusUnsupportedMediaType)
 			return
 		}
 
-		// Créer le répertoire d'uploads si nécessaire
-		uploadsDir := "./static/assets/img" // Ajustez le chemin si nécessaire
-		if err := os.MkdirAll(uploadsDir, os.ModePerm); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+		// Définir le répertoire utilisateur
+		userDir := filepath.Join("./static/assets/img", username)
+		if err := os.MkdirAll(userDir, os.ModePerm); err != nil {
+			http.Error(w, "Erreur lors de la création du dossier utilisateur", http.StatusInternalServerError)
 			return
 		}
 
-		// Créer un nouveau fichier dans le répertoire d'uploads
-		dst, err := os.Create(filepath.Join(uploadsDir, header.Filename))
+		// Générer un nom de fichier unique
+		timestamp := time.Now().Unix()
+		ext := filepath.Ext(header.Filename) // Récupère l'extension (.jpg, .png, etc.)
+		newFileName := strconv.FormatInt(timestamp, 10) + ext
+		dstPath := filepath.Join(userDir, newFileName)
+
+		// Créer le fichier sur le serveur
+		dst, err := os.Create(dstPath)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, "Erreur lors de l'enregistrement de l'image", http.StatusInternalServerError)
 			return
 		}
 		defer dst.Close()
 
-		// Copier le fichier téléchargé vers le fichier de destination
+		// Copier le fichier téléchargé
 		if _, err := io.Copy(dst, file); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, "Erreur de copie de fichier", http.StatusInternalServerError)
 			return
 		}
 
-		imagePath = filepath.Join(uploadsDir, header.Filename)
+		// Générer le chemin accessible via le web
+		imagePath = "/static/assets/img/" + username + "/" + newFileName
 
-		// Enregistrer l'image dans la base de données
-		imageFileInfo, err := os.Stat(dst.Name())
+		// Récupérer la taille de l'image
+		imageFileInfo, err := os.Stat(dstPath)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, "Erreur lors de la récupération des infos du fichier", http.StatusInternalServerError)
 			return
 		}
 		fileSize = int(imageFileInfo.Size())
@@ -120,37 +145,44 @@ func PostValidationHandler(w http.ResponseWriter, r *http.Request) {
 	// Insérer le post et obtenir l'ID
 	postID, err := db.PostInsert(session.UserID, title, postBody, categories)
 	if err != nil {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		http.Error(w, "Erreur lors de l'insertion du post", http.StatusInternalServerError)
 		return
 	}
 
-	// Gérer l'upload de fichier
+	// Enregistrer l'image dans la base de données si elle existe
 	if file != nil {
 		err = db.ImageInsert(postID, fileSize, imagePath)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, "Erreur lors de l'insertion de l'image", http.StatusInternalServerError)
 			return
 		}
 	}
-	// Redirect to the homepage on success
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+
+	// Envoyer la réponse JSON
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(PostResponse{
+		Success: true,
+		PostID:  postID,
+		Image:   imagePath,
+	})
 }
 
+// Fonction pour générer un titre à partir du contenu
 func makeTitle(content string) string {
-	maxLength := 20                  // Set a maximum character limit
-	words := strings.Fields(content) // Split the content into words by spaces
+	maxLength := 20
+	words := strings.Fields(content)
 
 	if len(words) >= 3 {
-		title := strings.Join(words[:3], " ") // Join the first three words with a space
-		if len(title) > maxLength {           // Check if title exceeds the max length
-			return title[:maxLength] + "..." // Truncate the title to the max length
+		title := strings.Join(words[:3], " ")
+		if len(title) > maxLength {
+			return title[:maxLength] + "..."
 		}
 		return title + "..."
 	}
 
-	if len(content) > maxLength { // If content has less than two words but exceeds max length
-		return content[:maxLength] // Truncate content to the max length
+	if len(content) > maxLength {
+		return content[:maxLength]
 	}
 
-	return content // Return the original content if it's within the limits
+	return content
 }

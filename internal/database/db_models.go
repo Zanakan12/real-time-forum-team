@@ -116,7 +116,8 @@ type WebSocketMessage struct {
 	Type      string `json:"type"`       // "message" ou "user_list"
 	Username  string `json:"username"`   // Expéditeur
 	Recipient string `json:"recipient"`  // Destinataire
-	Content   string `json:"content"`    // Contenu du message
-	Read      bool   `json:"read"`       // Indique si le message a été lu
+	Content   string `json:"content"`    // Contenu du message     // Indique si le message a été lu
 	CreatedAt string `json:"created_at"` // Timestamp
+	Read      bool   `json:"read"`
+	Sender    bool   `json:"sender"`
 }

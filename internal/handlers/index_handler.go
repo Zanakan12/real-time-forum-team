@@ -107,7 +107,5 @@ func sendJSONResponse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println("Réponse JSON envoyée :", string(jsonData)) // Affiche clairement la réponse JSON
-
 	w.Write(jsonData)
 }

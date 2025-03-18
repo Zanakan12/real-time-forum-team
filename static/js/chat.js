@@ -1,36 +1,31 @@
-document.addEventListener("DOMContentLoaded", async () => {
-  let socket;
-  let username;
+
+import { fetchConnectedUsers } from "/static/js/websocket.js";
+import { fetchUserData } from "/static/js/app.js";
+import { socket } from "/static/js/websocket.js";
+
+export async function chatManager() {
   let recipientSelect;
-  let onlineUser;
+  const user = await fetchUserData();
 
-  
-    function checkChatElements() {
-      const reduceBtn = document.getElementById("reduce-chat");
-      const closeBtn = document.getElementById("close-chat");
-      if (reduceBtn && closeBtn) {
-        reduceBtn.addEventListener("click", () => {
-          close("chat");
-          const chat = document.getElementById("chat-messages");
-          const bubbleBox = document.createElement("div");
-          bubbleBox.id = "bubble-box";
-          bubbleBox.classList.add("selectUser");
-          chat.appendChild(bubbleBox);
-          bubbleBox.addEventListener("click", (event) => {
-            handleUserSelection(event);
-            bubbleBox.remove();
-          });
-        });
+  const reduceBtn = document.getElementById("reduce-chat");
+  const closeBtn = document.getElementById("close-chat");
 
-        closeBtn.addEventListener("click", () => {
-          close("chat");
-        });
-      } else {
-        setTimeout(checkChatElements, 100); // Réessayer après 100ms
-      }
-    }
-    checkChatElements();
-  
+  reduceBtn.addEventListener("click", () => {
+    close("chat");
+    const chat = document.getElementById("chat-messages");
+    const bubbleBox = document.createElement("div");
+    bubbleBox.id = "bubble-box";
+    bubbleBox.classList.add("selectUser");
+    chat.appendChild(bubbleBox);
+    document.getElementById("bubble-box").addEventListener("click", (event) => {
+      handleUserSelection(event);
+      bubbleBox.remove();
+    });
+  });
+
+  closeBtn.addEventListener("click", () => {
+    close("chat");
+  });
 
   // Fonction pour ouvrir la liste
   function open(arg) {
@@ -38,6 +33,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (element.classList.contains("hidden")) {
       element.classList.remove("hidden"); // Ouvre la liste
       fetchAllUsers();
+
       fetchConnectedUsers();
       if (element.classList.contains("all-users")) updateUserList();
       if (element.classList.contains("chat")) fetchMessages(recipientSelect);
@@ -54,52 +50,39 @@ document.addEventListener("DOMContentLoaded", async () => {
     element.classList.add("hidden");
   }
 
-  
-    function checkChatButton() {
-      const openChatBtn = document.getElementById("open-chat");
-      if (openChatBtn) {
-        openChatBtn.addEventListener("click", (event) => {
-          event.stopPropagation();
-          const element = document.getElementById("all-users");
-          open("all-users");
+  const openChatBtn = document.getElementById("open-chat");
+  // Gérer l'ouverture du chat
+  if (openChatBtn) {
+    // Gérer l'ouverture du chat
+    openChatBtn.addEventListener("click", (event) => {
+      event.stopPropagation(); // Empêche la fermeture immédiate
 
-          // Gérer la fermeture du chat en cliquant à l'extérieur
-          document.addEventListener("click", (event) => {
-            if (
-              !element.contains(event.target) &&
-              event.target !== openChatBtn
-            ) {
-              close("all-users");
-            }
-          });
-        });
-      } else {
-        console.warn(
-          "⚠️ L'élément #open-chat n'existe pas encore, nouvelle tentative..."
-        );
-        setTimeout(checkChatButton, 100); // Réessaye après 100ms
+      const element = document.getElementById("all-users");
+      if (!element) {
+        console.error("❌ Erreur : #all-users introuvable !");
+        return;
       }
-    }
-    checkChatButton();
 
+      open("all-users");
 
-  
-    function checkUserLists() {
-      const usersOnline = document.getElementById("users-online");
-      const usersOffline = document.getElementById("users-offline");
+      // Gérer la fermeture du chat en cliquant à l'extérieur
+      document.addEventListener("click", (event) => {
+        if (!element.contains(event.target) && event.target !== openChatBtn) {
+          close("all-users");
+        }
+      });
+    });
+  } else {
+    console.warn("⚠️ L'élément #open-chat est introuvable !");
+  };
 
-      if (usersOnline && usersOffline) {
-        usersOnline.addEventListener("click", handleUserSelection);
-        usersOffline.addEventListener("click", handleUserSelection);
-      } else {
-        console.warn(
-          "⚠️ Les éléments #users-online ou #users-offline n'existent pas encore, nouvelle tentative..."
-        );
-        setTimeout(checkUserLists, 100); // Réessaye après 100ms
-      }
-    }
-    checkUserLists();
-  
+  document
+    .getElementById("users-online")
+    .addEventListener("click", handleUserSelection);
+
+  document
+    .getElementById("users-offline")
+    .addEventListener("click", handleUserSelection);
 
   function handleUserSelection(event) {
     if (event.target.classList.contains("selectUser")) {
@@ -129,53 +112,27 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const photochat = document.getElementById("photo-chat");
     photochat.style.backgroundImage =
-      "url('/static/assets/img/rafta74/profileImage.jpg')";
+      `url('/static/assets/img/${recipient}/profileImage.jpg')`;
   }
 
-  
-    function checkMessageInput() {
-      const messageInput = document.getElementById("message");
-      const sendMessageButton = document.getElementById("send-msg-button");
-
-      if (messageInput && sendMessageButton) {
-        messageInput.addEventListener("keydown", function (event) {
-          if (event.key === "Enter") {
-            sendMessageButton.click();
-          }
-        });
-        console.log("✅ Événement 'keydown' ajouté à #message !");
-      } else {
-        console.warn(
-          "⚠️ #message ou #send-msg-button n'existe pas encore, nouvelle tentative..."
-        );
-        setTimeout(checkMessageInput, 100); // Réessaye après 100ms
+  const messageInput = document.getElementById("message");
+  document
+    .getElementById("message")
+    .addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        document.getElementById("send-msg-button").click();
       }
-    }
-    checkMessageInput();
-  
+    });
 
-  
-    function checkMessagesContainer() {
-      const messagesContainer = document.getElementById("messages");
-
-      if (messagesContainer) {
-        messagesContainer.addEventListener("scroll", function () {
-          if (this.scrollTop === 0) {
-            // loadOlderMessages(); // Fonction pour récupérer les anciens messages
-          }
-        });
-        console.log("✅ Événement 'scroll' ajouté à #messages !");
-      } else {
-        console.warn("⚠️ #messages n'existe pas encore, nouvelle tentative...");
-        setTimeout(checkMessagesContainer, 100); // Réessaye après 100ms
-      }
+  document.getElementById("messages").addEventListener("scroll", function () {
+    if (this.scrollTop === 0) {
+      //loadOlderMessages(); // Fonction pour récupérer les anciens messages
     }
-    checkMessagesContainer();
-  
+  });
 
   /*function loadOlderMessages() {
     const messagesList = document.getElementById("messages");
-
+  
     for (let i = 0; i < 5; i++) {
       // Simulation de chargement de 5 anciens messages
       let oldMessage = document.createElement("li");
@@ -185,124 +142,29 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }*/
 
-  
-    function checkSendMessageButton() {
-      const sendMessageButton = document.getElementById("send-msg-button");
-
-      if (sendMessageButton) {
-        sendMessageButton.addEventListener("click", () => sendMessage());
-        console.log("✅ Événement 'click' ajouté à #send-msg-button !");
-      } else {
-        console.warn(
-          "⚠️ #send-msg-button n'existe pas encore, nouvelle tentative..."
-        );
-        setTimeout(checkSendMessageButton, 100); // Réessaye après 100ms
-      }
-    }
-    checkSendMessageButton();
-  
-
-  // Récupérer les infos utilisateur
-  async function fetchUserData() {
-    try {
-      const response = await fetch("https://localhost:8080/api/get-user");
-      const data = await response.json();
-      if (data.username) {
-        username = data.username;
-        connectWebSocket();
-      } else {
-       // window.location.href = "/login";
-      }
-    } catch (error) {
-      console.error(
-        "❌ Erreur lors de la récupération de l'utilisateur :",
-        error
-      );
-     // window.location.href = "/login";
-    }
-  }
 
   // Récupérer les anciens messages
-  async function fetchMessages(recipientSelect) {
-    if (recipientSelect === undefined) return;
-    try {
-      const response = await fetch(
-        `https://localhost:8080/api/chat?recipient=${recipientSelect}`
-      );
-      if (!response.ok)
-        throw new Error(`HTTP error! Status: ${response.status}`);
 
-      let messages = await response.json();
-      messages = JSON.parse(messages);
 
-      if (!Array.isArray(messages)) {
-        return console.warn("⚠️ Aucun message disponible.");
-      }
-      const messagesList = document.getElementById("messages");
-      messagesList.innerHTML = "";
-      messages.forEach((msg) => {
-        let isSender = false;
-        if (msg.username === username) {
-          isSender = true;
-        }
-        appendMessage(
-          msg.type,
-          msg.username,
-          msg.recipient,
-          msg.content,
-          msg.created_at,
-          isSender
-        );
-      });
-    } catch (error) {
-      console.error("❌ Erreur lors de la récupération des messages :", error);
-    }
-  }
 
-  // Récupérer la liste des utilisateurs connectés
-  async function fetchConnectedUsers() {
-    try {
-      const response = await fetch(
-        "https://localhost:8080/api/users-connected"
-      );
-      const users = await response.json();
-      onlineUser = await JSON.parse(users);
-      updateUserList(await JSON.parse(users));
-    } catch (error) {
-      console.error(
-        "❌ Erreur lors de la récupération des utilisateurs connectés :",
-        error
-      );
-    }
-  }
 
   // input texte detection
   let typingTimer;
-  
-    function checkMessageInput() {
-        const messageInput = document.getElementById("message");
+  const TYPING_DELAY = 100; // Délai avant d'envoyer "typing"
 
-        if (messageInput) {
-            messageInput.addEventListener("input", () => {
-                clearTimeout(typingTimer);
-                typingTimer = setTimeout(() => {
-                    messageDetectInput();
-                }, TYPING_DELAY);
-            });
-            console.log("✅ Événement 'input' ajouté à #message !");
-        } else {
-            console.warn("⚠️ #message n'existe pas encore, nouvelle tentative...");
-            setTimeout(checkMessageInput, 100); // Réessaye après 100ms
-        }
-    }
-    checkMessageInput();
+  messageInput.addEventListener("input", () => {
+    clearTimeout(typingTimer);
 
+    typingTimer = setTimeout(() => {
+      messageDetectInput();
+    }, TYPING_DELAY);
+  });
 
   function messageDetectInput() {
     if (socket.readyState === WebSocket.OPEN) {
       const typingObj = {
         type: "typing",
-        username: username,
+        username: user.username,
         recipient: recipientSelect,
       };
 
@@ -313,36 +175,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // Connexion WebSocket
-  function connectWebSocket() {
-    socket = new WebSocket(`wss://localhost:8080/ws?username=${username}`);
-
-    socket.onopen = () => {
-      console.log("✅ Connexion WebSocket établie !");
-      fetchConnectedUsers();
-    };
-
-    socket.addEventListener("message", (event) => {
-      try {
-        const message = JSON.parse(event.data); // Convertir en objet JavaScript
-        appendMessage(
-          message.type,
-          message.username,
-          message.recipient,
-          message.content,
-          message.created_at,
-          false
-        );
-        // Traiter le message comme nécessaire
-      } catch (error) {
-        console.error("Erreur lors de la réception du message :", error);
-      }
-    });
-    socket.onclose = () => console.warn("⚠️ Connexion WebSocket fermée.");
-  }
+  const sendMessageButton = document.getElementById("send-msg-button");
+  sendMessageButton.addEventListener("click", () => sendMessage());
 
   // Envoi de message
-  function sendMessage() {
+  async function sendMessage() {
     const recipient = recipientSelect;
     const message = messageInput.value.trim();
     const date = new Date();
@@ -358,49 +195,36 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (socket.readyState === WebSocket.OPEN) {
       const msgObj = {
         type: "message",
-        username: username,
+        username: user.username,
         recipient: recipient,
         content: message,
         created_at: hour,
       };
-      console.log(socket);
+
       socket.send(JSON.stringify(msgObj));
-      appendMessage("", username, recipient, message, hour, true); // Affichage immédiat
+      appendMessage("", user.username, recipient, message, hour, true); // Affichage immédiat
       messageInput.value = "";
     } else {
       alert("WebSocket non connecté !");
     }
   }
 
-  // Mettre à jour la liste des utilisateurs connectés
-  function updateUserList(users) {
-    console.log("👥 Mise à jour de la liste des utilisateurs :", users);
-    const usersList = document.getElementById("users-online");
-    usersList.innerHTML = "";
 
-    users.forEach((user) => {
-      const li = document.createElement("li");
-      li.classList.add("selectUser", "online");
-      li.id = `${user}`;
-      if (user === username) li.style.setProperty("--before-content", '"Vous"');
-      else li.style.setProperty("--before-content", `"${user}"`);
-      usersList.appendChild(li);
-    });
-  }
 
   // Ajouter un message dans le chat
   function appendMessage(
     type,
-    username,
+    sender,
     recipient,
     content,
     createdAt,
     isSender
   ) {
     const messagesList = document.getElementById("messages");
-
     const li = document.createElement("li");
 
+    if (sender == user.username) isSender = true
+    else isSender = false;
     li.classList.add("message");
 
     if (li.classList.contains("message")) {
@@ -425,7 +249,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           <span class="dot">.</span>
         `;
         messagesList.appendChild(li);
-        scrollToBottom("messages");
       }
 
       // Réinitialiser le timer pour éviter une suppression prématurée
@@ -433,12 +256,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       typingTimeout = setTimeout(() => {
         const typingElement = document.getElementById("typing");
         if (typingElement) typingElement.remove();
-      }, 2000); // Disparaît après 2 secondes si aucune nouvelle frappe
+      }, 1000); // Disparaît après 2 secondes si aucune nouvelle frappe
     } else {
       // Cas normal : afficher le message
       li.innerHTML = `${content} <small>${createdAt}</small>`;
       messagesList.appendChild(li);
-      scrollToBottom("messages");
     }
 
     // Vérifier si l'utilisateur est en bas avant de scroller
@@ -465,75 +287,135 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!response.ok) {
         throw new Error("Erreur lors de la récupération des utilisateurs");
       }
+
       const users = await response.json();
 
-      const filtredUser = users.sort((a, b) =>
-        a.Username.localeCompare(b.Username)
+      // ⚠️ Filtrer les entrées invalides (undefined ou sans Username)
+      const validUsers = users.filter(user => user && user.username);
+
+      // 🔄 Trier uniquement les éléments valides
+      const filtredUser = validUsers.sort((a, b) =>
+        a.username.localeCompare(b.username)
       );
-      // Affichage sur la page HTML (si nécessaire)
+
+      // 🖥️ Mise à jour du DOM
       const userList = document.getElementById("users-offline");
       userList.innerHTML = "";
-      filtredUser.forEach((user) => {
-        if (user.Username !== username) {
+
+      filtredUser.forEach((users) => {
+        if (users.username !== user.username) {
           const li = document.createElement("li");
           li.classList.add("selectUser", "offline", "short");
-          li.id = `${user.Username}`;
-          li.style.setProperty("--before-content", `"${user.Username}"`);
+          li.id = users.username;
+          li.style.setProperty("--before-content", `"${users.username}"`);
           userList.appendChild(li);
         }
       });
+
     } catch (error) {
       console.error("Erreur :", error);
     }
   }
 
-  console.log("🚀 - Page chargée !");
-  await fetchUserData();
-});
+  let limitMessage = 10; // Nombre de messages à charger
+  let totalMessages = 0; // Stocke le nombre total de messages pour éviter des erreurs
 
-/*
-btnProfile.style.backgroundImage = `url('static/assets/img/${username}/profileimage.png')`;
-  btnProfile.style.backgroundSize = "cover"; // Ajuste l'image
-  btnProfile.style.backgroundPosition = "center"; // Centre l'image
-  btnProfile.style.backgroundRepeat = "no-repeat"; // Empêche la répétition
-  
-const btnProfile = document.getElementById(profile - image - nav);
-  console.log(btnProfile.textContent);
-  console.log(`url('static/assets/img/${username}/profileimage.png')`);
+  async function fetchMessages(recipientSelect) {
+    if (!recipientSelect) return;
 
-document
-  .getElementById("imageInput")
-  .addEventListener("change", function (event) {
-    console.log("telechargement en CountQueuingStrategy");
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        const preview = document.getElementById("preview");
-        preview.src = e.target.result;
-        preview.style.display = "block";
-      };
-      reader.readAsDataURL(file);
+    try {
+      const response = await fetch(
+        `https://localhost:8080/api/chat?recipient=${recipientSelect}`
+      );
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+      let messages = await response.json();
+      messages = JSON.parse(messages);
+
+      if (typeof messages === "object") {
+        messages = Object.values(messages); // Convertir l'objet en tableau
+      }
+
+      totalMessages = messages.length; // Stocker la longueur totale des messages
+
+      // Vérification pour éviter les dépassements
+      if (limitMessage > totalMessages) {
+        limitMessage = totalMessages;
+      }
+
+      // Récupérer uniquement les `limitMessage` derniers messages
+      const paginatedMessages = messages.slice(-limitMessage);
+
+      console.log("Messages affichés :", paginatedMessages);
+
+      const messagesList = document.getElementById("messages");
+      messagesList.innerHTML = ""; // Effacer la liste avant d'afficher
+
+      paginatedMessages.forEach((msg) => {
+        let isSender = msg.username === user.username;
+        appendMessage(msg.type, msg.username, msg.recipient, msg.content, msg.created_at, isSender);
+      });
+
+    } catch (error) {
+      console.error("❌ Erreur lors de la récupération des messages :", error);
+    }
+  }
+
+
+  document.getElementById("messages").addEventListener("scroll", throttle(() => {
+    const messagesList = document.getElementById("messages");
+
+    if (messagesList.scrollTop === 0) {
+      limitMessage += 10;
+      console.log("limite message fetched", limitMessage)
+      fetchMessages(recipientSelect);
+    }
+  }, 10)); // Utilisation d’un throttle pour éviter le spam
+
+  function throttle(func, delay) {
+    let lastCall = 0;
+    return function (...args) {
+      const now = new Date().getTime();
+      if (now - lastCall < delay) return;
+      lastCall = now;
+      func(...args);
+    };
+  }
+
+
+  //message reçu par le destinataire
+  socket.addEventListener("message", (event) => {
+    try {
+      const message = JSON.parse(event.data);
+      const notification = document.getElementById("notification-messages");
+      const chat = document.getElementById("chat");
+      let seen = chat && !chat.classList.contains("hidden");
+
+      if (seen) {
+        appendMessage(
+          message.type,
+          message.username,
+          message.recipient,
+          message.content,
+          message.created_at,
+          false
+        );
+      } else if (notification && message.type === "message") {
+        let count = parseInt(notification.textContent || "0", 10);
+        notification.textContent = count + 1;
+        console.log(message.username)
+        const notificationOnUserPhoto = document.getElementById(`${message.username}`);
+
+        if (notificationOnUserPhoto) {
+          let userNotifCount = parseInt(notificationOnUserPhoto.textContent || "0", 10);
+          notificationOnUserPhoto.textContent = userNotifCount + 1;
+        } else {
+          console.error("L'élément de notification pour l'utilisateur n'existe pas !");
+        }
+
+      }
+    } catch (error) {
+      console.error("Erreur lors de la réception du message :", error);
     }
   });
-
-document
-  .getElementById("uploadForm")
-  .addEventListener("submit", async function (event) {
-    event.preventDefault();
-
-    const formData = new FormData();
-    formData.append(
-      "user-profile",
-      document.getElementById("user-profile").value
-    );
-    formData.append("image", document.getElementById("imageInput").files[0]);
-
-    const response = await fetch("http://localhost:8080/upload", {
-      method: "POST",
-      body: formData,
-    });
-
-    const result = await response.text();
-    document.getElementById("responseMessage").innerText = result;
-  });*/
+}

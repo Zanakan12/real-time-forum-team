@@ -7,7 +7,7 @@ import (
 	"golang.org/x/time/rate"
 )
 
-var limiter = NewIPRateLimiter(1, 5)
+var limiter = NewIPRateLimiter(1, 50)
 
 func RateLimitingMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

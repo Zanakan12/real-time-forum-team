@@ -85,14 +85,24 @@ func HandleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Check if the user exists
+	// Extraction du prénom et du nom
+	firstName, _ := user["given_name"].(string) // Google retourne "given_name"
+	lastName, _ := user["family_name"].(string) // Google retourne "family_name"
+
+	// Extraction du genre si disponible (Google ne le fournit pas toujours)
+	genre, _ := user["gender"].(string)
+	if genre == "" {
+		genre = "unspecified" // Valeur par défaut si non disponible
+	}
+
+	// Vérification si l'utilisateur existe
 	authUser, logOAuthErr := db.UserSelectLoginOAuth(email)
 
 	if logOAuthErr != nil {
 		log.Printf("Utilisateur non trouvé, création d'un nouveau compte pour: %s", email)
 		username, ok := user["name"].(string)
-		if !ok { // Use email as username if name is not available
-			username = email[:strings.Index(email, "@")] // Remove domain from email
+		if !ok {
+			username = email[:strings.Index(email, "@")]
 		}
 		password, err := GeneratePassword(12)
 		if err != nil {
@@ -100,7 +110,7 @@ func HandleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err = db.UserInsertRegister(email, username, password, "user")
+		err = db.UserInsertRegister(email, username, password, firstName, lastName, genre, "user")
 		if err != nil {
 			log.Printf("Erreur lors de la création de l'utilisateur: %v", err)
 			http.Error(w, "Échec de la création de l'utilisateur: "+err.Error(), http.StatusInternalServerError)
@@ -116,7 +126,7 @@ func HandleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	authUser.Username, _ = db.DecryptData(authUser.Username)
-	// Create session using your custom CreateSession function
+	// Création de la session
 	middlewares.CreateSession(w, authUser.ID, authUser.Username, authUser.Role)
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)

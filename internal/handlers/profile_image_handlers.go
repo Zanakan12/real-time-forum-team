@@ -1,13 +1,24 @@
 package handlers
 
 import (
+	"db"
+	"encoding/json"
 	"fmt"
 	"io"
+	"log"
+	"middlewares"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
 )
+
+type Response struct {
+	Success bool   `json:"success"`
+	Message string `json:"message,omitempty"`
+	Error   string `json:"error,omitempty"`
+	Image   string `json:"image,omitempty"`
+}
 
 // Fonction qui sauvegarde l'image sous le nom "profileimage"
 func saveImageToUserFolder(username string, fileHeader *multipart.FileHeader, file multipart.File) (string, error) {
@@ -20,12 +31,12 @@ func saveImageToUserFolder(username string, fileHeader *multipart.FileHeader, fi
 
 	// Récupérer l'extension du fichier original
 	ext := filepath.Ext(fileHeader.Filename) // Exemple : ".jpg" ou ".png"
-	if ext == "" {
+	if ext != ".png" {
 		ext = ".png" // Sécurité : Si pas d'extension, on met ".png"
 	}
 
 	// Nom du fichier toujours "profileimage.extension"
-	filePath := filepath.Join(userDir, "profileimage"+ext)
+	filePath := filepath.Join(userDir, "profileImage"+ext)
 
 	// Création du fichier destination
 	dst, err := os.Create(filePath)
@@ -43,35 +54,61 @@ func saveImageToUserFolder(username string, fileHeader *multipart.FileHeader, fi
 	return filePath, nil
 }
 
-// Gestionnaire de l'upload
+// ✅ Gestionnaire de l'upload qui retourne un JSON
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
 	if r.Method != http.MethodPost {
-		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(Response{
+			Success: false,
+			Error:   "Méthode non autorisée",
+		})
 		return
 	}
 
 	// Récupérer le nom d'utilisateur
-	username := r.FormValue("username")
-	if username == "" {
-		http.Error(w, "Erreur : Nom d'utilisateur manquant", http.StatusBadRequest)
+	username := middlewares.GetCookie(w, r)
+	usernameDecrypted,err := db.DecryptData(username.Username)
+	if err != nil{
+		log.Printf("Erreur lors du decryptage de l'ussername %s",err)
+	}
+	if usernameDecrypted == "traveller" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(Response{
+			Success: false,
+			Error:   "Erreur : Nom d'utilisateur manquant",
+		})
 		return
 	}
 
 	// Récupérer le fichier
 	file, fileHeader, err := r.FormFile("image")
 	if err != nil {
-		http.Error(w, "Erreur : Aucune image fournie", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(Response{
+			Success: false,
+			Error:   "Erreur : Aucune image fournie",
+		})
 		return
 	}
 	defer file.Close()
 
 	// Sauvegarde avec nom "profileimage"
-	filePath, err := saveImageToUserFolder(username, fileHeader, file)
+	filePath, err := saveImageToUserFolder(usernameDecrypted, fileHeader, file)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(Response{
+			Success: false,
+			Error:   err.Error(),
+		})
 		return
 	}
 
-	// Réponse
-	fmt.Fprintf(w, "Image enregistrée : %s", filePath)
+	// ✅ Réponse JSON de succès
+	json.NewEncoder(w).Encode(Response{
+		Success: true,
+		Message: "Image enregistrée avec succès",
+		Image:   filePath, // Chemin de l'image sauvegardée
+	})
 }

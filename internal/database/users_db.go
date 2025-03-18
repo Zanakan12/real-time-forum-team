@@ -11,23 +11,27 @@ import (
 func createUsersTable(db *sql.DB) {
 	// SQL statement to create the users table if it does not already exist
 	createTableSQL := `CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    username VARCHAR(50) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    role TEXT NOT NULL CHECK (role IN ('admin', 'user', 'moderator','banned')),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    last_refresh at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);`
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		email VARCHAR(255) NOT NULL UNIQUE,
+		username VARCHAR(50) NOT NULL UNIQUE,
+		password VARCHAR(255) NOT NULL,
+		first_name VARCHAR(255),
+		last_name VARCHAR(255),
+		genre VARCHAR(50),
+		role TEXT NOT NULL CHECK (role IN ('admin', 'user', 'moderator','banned')),
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		last_refresh TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+	);`
 
 	// Call executeSQL to run the SQL statement and create the table
 	executeSQL(db, createTableSQL)
 }
 
 // RegisterUser registers a new user in the database.
-func UserInsertRegister(email, username, password, role string) error {
+func UserInsertRegister(email, username, password, firstName, lastName, genre, role string) error {
 	db := SetupDatabase()
 	defer db.Close()
+
 	users, _ := UserSelect(db)
 	for _, user := range users {
 		decryptedEmail, _ := DecryptData(user.Email)
@@ -38,29 +42,30 @@ func UserInsertRegister(email, username, password, role string) error {
 			return fmt.Errorf("Username already exists.")
 		}
 	}
+
 	tx, err := db.Begin()
 	if err != nil {
 		return fmt.Errorf("error starting transaction: %v", err)
 	}
 
-	// Hash the password
+	// Hash du mot de passe
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return fmt.Errorf("error hashing password: %v", err)
 	}
 
+	// Chiffrement des données sensibles
 	encryptedEmail, err := EncryptData(email)
 	if err != nil {
 		return fmt.Errorf("error encrypting email: %v", err)
 	}
-
 	encryptedUsername, err := EncryptData(username)
 	if err != nil {
 		return fmt.Errorf("error encrypting username: %v", err)
 	}
 
-	insertSQL := `INSERT INTO users (email, username, password, role) VALUES (?, ?, ?, ?)`
-	_, err = tx.Exec(insertSQL, encryptedEmail, encryptedUsername, hashedPassword, role)
+	insertSQL := `INSERT INTO users (email, username, password, first_name, last_name, genre, role) VALUES (?, ?, ?, ?, ?, ?, ?)`
+	_, err = tx.Exec(insertSQL, encryptedEmail, encryptedUsername, hashedPassword, firstName, lastName, genre, role)
 	if err != nil {
 		tx.Rollback()
 		return fmt.Errorf("error executing statement: %v", err)
@@ -71,6 +76,21 @@ func UserInsertRegister(email, username, password, role string) error {
 	}
 
 	return nil
+}
+
+// vérifier l'existance de l'utilisateur
+func UserExists(email, username string) (bool, error) {
+	db := SetupDatabase()
+	defer db.Close()
+
+	var count int
+	query := `SELECT COUNT(*) FROM users WHERE email = ? OR username = ?`
+	err := db.QueryRow(query, email, username).Scan(&count)
+	if err != nil {
+		return false, fmt.Errorf("error checking user existence: %v", err)
+	}
+
+	return count > 0, nil
 }
 
 // LoginUser authentifie un utilisateur en vérifiant ses identifiants.
