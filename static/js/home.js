@@ -4,7 +4,7 @@ export function homePage() {
   const div = document.createElement("div");
   div.innerHTML = `
       <div id="newpost-container"></div>
-      <div id="categories-selection-container"></div>
+      <div id="categories-selection-container" class="hidden"></div>
       <div id="lastposts-container"></div>
       <div id="chat-messages" class="fold">
               <div id="all-users" class="hidden">

@@ -3,7 +3,12 @@ export function fetchAndUpdatePosts(postsContainer) {
   fetch("/?format=json")
     .then((response) => response.json())
     .then((data) => {
-      //console.log("📩 Données reçues :", data.mostRecentPosts);
+
+      console.log("📦 Données récupérées :", data.mostRecentPosts);
+      if (data.mostRecentPosts === null) {
+        console.warn("⚠️ Aucun post trouvé dans la base de données.");
+        return;
+      }
 
       if (!postsContainer) {
         return

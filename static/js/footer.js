@@ -8,5 +8,4 @@ function loadFooter() {
     document.body.insertAdjacentHTML("beforeend", footerHTML);
 }
 
-// Charger le footer après que le DOM soit prêt
-window.addEventListener("DOMContentLoaded", loadFooter);
+
