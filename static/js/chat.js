@@ -3,7 +3,7 @@ import { fetchConnectedUsers } from "/static/js/websocket.js";
 import { fetchUserData } from "/static/js/app.js";
 import { socket } from "/static/js/websocket.js";
 
- export async function chatManager(){
+export async function chatManager() {
   let recipientSelect;
   const user = await fetchUserData();
 
@@ -249,7 +249,6 @@ import { socket } from "/static/js/websocket.js";
           <span class="dot">.</span>
         `;
         messagesList.appendChild(li);
-        scrollToBottom("messages");
       }
 
       // Réinitialiser le timer pour éviter une suppression prématurée
@@ -262,7 +261,6 @@ import { socket } from "/static/js/websocket.js";
       // Cas normal : afficher le message
       li.innerHTML = `${content} <small>${createdAt}</small>`;
       messagesList.appendChild(li);
-      scrollToBottom("messages");
     }
 
     // Vérifier si l'utilisateur est en bas avant de scroller
@@ -319,44 +317,71 @@ import { socket } from "/static/js/websocket.js";
     }
   }
 
+  let limitMessage = 10; // Nombre de messages à charger
+  let totalMessages = 0; // Stocke le nombre total de messages pour éviter des erreurs
 
   async function fetchMessages(recipientSelect) {
-    if (recipientSelect === undefined) return;
+    if (!recipientSelect) return;
+
     try {
       const response = await fetch(
         `https://localhost:8080/api/chat?recipient=${recipientSelect}`
       );
-      if (!response.ok)
-        throw new Error(`HTTP error! Status: ${response.status}`);
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
       let messages = await response.json();
       messages = JSON.parse(messages);
 
-      if (!Array.isArray(messages)) {
-        return console.warn("⚠️ Aucun message disponible.");
+      if (typeof messages === "object") {
+        messages = Object.values(messages); // Convertir l'objet en tableau
       }
-      console.log("message:", messages)
-      const messagesList = document.getElementById("messages");
-      messagesList.innerHTML = "";
-      messages.forEach((msg) => {
 
-        let isSender = false;
-        if (msg.username === user.username) {
-          isSender = true;
-        }
-        appendMessage(
-          msg.type,
-          msg.username,
-          msg.recipient,
-          msg.content,
-          msg.created_at,
-          isSender
-        );
+      totalMessages = messages.length; // Stocker la longueur totale des messages
+
+      // Vérification pour éviter les dépassements
+      if (limitMessage > totalMessages) {
+        limitMessage = totalMessages;
+      }
+
+      // Récupérer uniquement les `limitMessage` derniers messages
+      const paginatedMessages = messages.slice(-limitMessage);
+
+      console.log("Messages affichés :", paginatedMessages);
+
+      const messagesList = document.getElementById("messages");
+      messagesList.innerHTML = ""; // Effacer la liste avant d'afficher
+
+      paginatedMessages.forEach((msg) => {
+        let isSender = msg.username === user.username;
+        appendMessage(msg.type, msg.username, msg.recipient, msg.content, msg.created_at, isSender);
       });
+
     } catch (error) {
       console.error("❌ Erreur lors de la récupération des messages :", error);
     }
   }
+
+
+  document.getElementById("messages").addEventListener("scroll", throttle(() => {
+    const messagesList = document.getElementById("messages");
+
+    if (messagesList.scrollTop === 0) {
+      limitMessage += 10;
+      console.log("limite message fetched", limitMessage)
+      fetchMessages(recipientSelect);
+    }
+  }, 10)); // Utilisation d’un throttle pour éviter le spam
+
+  function throttle(func, delay) {
+    let lastCall = 0;
+    return function (...args) {
+      const now = new Date().getTime();
+      if (now - lastCall < delay) return;
+      lastCall = now;
+      func(...args);
+    };
+  }
+
 
   //message reçu par le destinataire
   socket.addEventListener("message", (event) => {

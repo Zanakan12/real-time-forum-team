@@ -193,6 +193,7 @@ textarea {
   list-style: none;
   padding: 5px;
   margin: 0;
+  gap: 10px;
   border-bottom: 2px solid rgb(62, 61, 61);
   border-top: 2px solid rgb(62, 61, 61);
   max-height: 400px; /* Hauteur max pour le scroll */
