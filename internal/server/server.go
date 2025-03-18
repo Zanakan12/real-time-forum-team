@@ -64,6 +64,7 @@ func InitServer() {
 	server.Handle("/api/users-connected", handlers.GetUserListHandler)
 	http.HandleFunc("/api/chat", handlers.GetChatHistory)
 	http.HandleFunc("/api/all-user", handlers.GetAllUsersHandler)
+	http.HandleFunc("/api/comments", handlers.GetCommentsHandler)
 	// Start the server
 	if err := server.Start(); err != nil {
 		fmt.Printf("Error starting server: %v\n", err)

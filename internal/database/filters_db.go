@@ -58,11 +58,11 @@ func FilterSelectMostRecentPosts() ([]Post, error) {
 			return nil, fmt.Errorf("error iterating rows: %v", err)
 		}
 		for i, post := range posts {
-			posts[i].Categories, err = categorySelectByPostId(post.ID, db)
+			posts[i].Categories, err = categorySelectByPostId(post.ID)
 			if err != nil {
 				return nil, fmt.Errorf("error parsing categories: %v", err)
 			}
-			posts[i].Comments, err = CommentSelectByPostID(post.ID, db)
+			posts[i].Comments, err = CommentSelectByPostID(post.ID)
 			if err != nil {
 				return nil, fmt.Errorf("error parsing comments: %v", err)
 			}
@@ -294,11 +294,11 @@ func FilterUserPosts(userID int) ([]Post, error) {
 	}
 
 	for i, post := range posts {
-		posts[i].Categories, err = categorySelectByPostId(post.ID, db)
+		posts[i].Categories, err = categorySelectByPostId(post.ID)
 		if err != nil {
 			return nil, fmt.Errorf("error parsing categories: %v", err)
 		}
-		posts[i].Comments, err = CommentSelectByPostID(post.ID, db)
+		posts[i].Comments, err = CommentSelectByPostID(post.ID)
 		if err != nil {
 			return nil, fmt.Errorf("error parsing comments: %v", err)
 		}
@@ -394,11 +394,11 @@ func FilterPostsByCategories(categoryIDs []int) ([]Post, error) {
 	}
 
 	for i, post := range posts {
-		posts[i].Categories, err = categorySelectByPostId(post.ID, db)
+		posts[i].Categories, err = categorySelectByPostId(post.ID)
 		if err != nil {
 			return nil, fmt.Errorf("error parsing categories: %v", err)
 		}
-		posts[i].Comments, err = CommentSelectByPostID(post.ID, db)
+		posts[i].Comments, err = CommentSelectByPostID(post.ID)
 		if err != nil {
 			return nil, fmt.Errorf("error parsing comments: %v", err)
 		}

@@ -81,6 +81,8 @@ async function updateUserList(users) {
     const li = document.createElement("li");
     li.classList.add("selectUser", "online");
     li.id = `${user}`;
+    li.style.backgroundImage =
+      `url('/static/assets/img/${user}/profileImage.jpg')`
     if (user === username.username) li.style.setProperty("--before-content", '"Vous"');
     else li.style.setProperty("--before-content", `"${user}"`);
     usersList.appendChild(li);

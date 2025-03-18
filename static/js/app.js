@@ -33,7 +33,7 @@ async function loadPage() {
 
   let userData = await fetchUserData();
   if (userData && userData.username) {
-    
+
     if (hash === "login") hash = "home";
     showHiddenButton(userData);
     chatManager(userData);
@@ -45,11 +45,10 @@ async function loadPage() {
       console.log("⚠️ WebSocket déjà actif, aucune nouvelle connexion.");
     }
   }
-  console.log("hash before", hash)
+
   if (routes[hash]) {
     try {
       const page = await routes[hash]();
-      console.log("Page retournée :", page);
 
       if (page instanceof Node) {
         app.innerHTML = "";

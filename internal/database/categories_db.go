@@ -61,7 +61,9 @@ func CategoryInsertDefault() error {
 	return nil
 }
 
-func categorySelectByPostId(postID int, db *sql.DB) ([]Category, error) {
+func categorySelectByPostId(postID int) ([]Category, error) {
+	db := SetupDatabase()
+	defer db.Close()
 
 	tx, err := db.Begin()
 	if err != nil {

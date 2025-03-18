@@ -3,8 +3,6 @@ export function fetchAndUpdatePosts(postsContainer) {
   fetch("/?format=json")
     .then((response) => response.json())
     .then((data) => {
-
-      console.log("📦 Données récupérées :", data.mostRecentPosts);
       if (data.mostRecentPosts === null) {
         console.warn("⚠️ Aucun post trouvé dans la base de données.");
         return;
@@ -107,82 +105,74 @@ if (postsContainer) {
 }
 
 export function appendPost(post, formattedDate, postsContainer) {
+
   const postElement = document.createElement("div");
   postElement.id = "post-format"
   postElement.innerHTML = `
-            <form id="form-${post.id}" action="/post-update-validation" method="post">
-              <table class="post">
-                <tr>
-                  <td class="username">
-                    <div class="photo-chat" style="background-image: url('/static/assets/img/${post.user.username}/profileImage.jpg');"></div>
-                    <div class="username">${post.user.username}</div>
-                  </td>
-                  <td><span>${post.categories ? post.categories : ""}</span></td>
-                  <td> <button id="modif-post-${post.id}" type="button" class="modif-post">✏️ Modifier</button></td>
-                </tr>
-                <tr>
-                  <td colspan="3" class="written">
-                    Posté le ${formattedDate}
-                  </td>
-                </tr>
-                <tr>
-                  <td colspan="3" class="postcontent">
-                    <input type="hidden" name="post_id" value="${post.id}">
-                    <div id="textarea-container-${post.id}">
-                      <div id="textarea-${post.id}" name="content">${post.body}</div>
-                    </div>
-                    
-                  </td>
-                </tr>
-                <tr>
-                  <td colspan="3" style="text-align: center;">
-                    <img src="${post.image_path}" alt="Post Image" style="max-width: 500px; height: auto;" />
-                  </td>
-                </tr>
-                <td class="post-status" style="font-style: italic;">Status: ${post.status}</td>
-              </table>
-              <form action="/post-delete-validation" method="post" style="display: inline;">
-              <input type="hidden" name="post_id" value="${post.id}">
-              <button type="submit">🗑️</button>
+    <form id="form-${post.id}" action="/post-update-validation" method="post">
+        <div class="post">
+            <div class="post-header">
+                <div class="photo-chat" data-username="${post.user.username}"></div>
+                <div class="username">${post.user.username}</div>
+                <span class="category">${post.categories ? post.categories : ""}</span>
+                <button id="modif-post-${post.id}" type="button" class="modif-post">✏️ Modifier</button>
+            </div>
+
+            <div class="post-meta">
+                Posté le ${formattedDate}
+            </div>
+
+            <div class="post-content">
+                <input type="hidden" name="post_id" value="${post.id}">
+                <div id="textarea-container-${post.id}">
+                    <div id="textarea-${post.id}" name="content">${post.body}</div>
+                </div>
+            </div>
+
+            <div class="post-image">
+                <img src="${post.image_path}" alt="Post Image" />
+            </div>
+
+            <div class="post-status">
+                <em>Status: ${post.status}</em>
+            </div>
+
+            
+
+            <div class="likes-buttons">
+                <form class="like-form" data-id="${post.id}" data-type="like">
+                    <button type="button" class="like-button">
+                        <span>${post.likes_count}</span>
+                        <img src="/static/assets/img/like.png" alt="Like">
+                    </button>
+                </form>
+                <form class="dislike-form" data-id="${post.id}" data-type="dislike">
+                    <button type="button" class="dislike-button">
+                        <span>${post.dislikes_count}</span>
+                        <img src="/static/assets/img/dislike.png" alt="Dislike">
+                    </button>
+                </form>
+            </div>
+
+            <div id="comments-${post.id}" class="comments-container">
+                <h3>Commentaires</h3>
+            </div>
+
+            <form id="comment-input" action="/comment-validation" method="post" class="comment-form">
+                <input type="hidden" name="post_id" value="${post.id}">
+                <input id="content" name="content" type="text" placeholder="Make a comment here ..." required>
+                <input type="submit" value="Send">
             </form>
-            <div class="likesbuttons">
-          <form class="like-form" data-id="${post.id}" data-type="like">
-              <button type="button" class="like-button" style="background: none; border: none; cursor: pointer;">
-                  <span>${post.likes_count}</span>
-                  <img src="/static/assets/img/like.png" alt="Like" style="width: 15px; vertical-align: middle;">
-              </button>
+        </div>
+        <form action="/post-delete-validation" method="post" class="post-delete-form">
+                <input type="hidden" name="post_id" value="${post.id}">
+                <button type="submit" class="delete-btn">🗑️</button>
           </form>
-          <form class="dislike-form" data-id="${post.id}" data-type="dislike">
-              <button type="button" class="dislike-button" style="background: none; border: none; cursor: pointer;">
-                  <span>${post.dislikes_count}</span>
-                  <img src="/static/assets/img/dislike.png" alt="Dislike" style="width: 15px; vertical-align: middle;">
-              </button>
-          </form>
-      </div>
-      <tr id="comment-row-${post.id}">
-    <td colspan="2">
-        <form action="/comment-update-validation" method="post" class="hidden">
-            <input type="hidden" name="comment_id" value="${post}">
-            <div id="textarea-${post.id}}" name="content" rows="" cols="">${post.comment}</div>
-            <button type="submit">✏️</button>
-        </form>
-        <form action="/comment-delete-validation" method="post" style="text-align: right;" class="hidden">
-            <input type="hidden" name="comment_id" value="${post.id}">
-            <button type="submit">🗑️</button>
-        </form>
-    </td>
-</tr>
-      <form id="comment-input"action="/comment-validation" method="post">
-        <input type="hidden" name="post_id" value="${post.id}">
-        
-            <input id="content" name="content" type="text" placeholder="Make a comment here ..." required></input>
-            <input type="submit" value="Send">
-        
-        </form>
-        </form>      
-          `;
+    </form>
+`;
 
   postsContainer.appendChild(postElement);
+  fetchComments(post.id);
 }
 
 
@@ -206,34 +196,84 @@ document.querySelectorAll(".like-button, .dislike-button").forEach(button => {
         }
       });
   });
-
-  const commentForm = document.querySelector("#comment-form");
-  if (commentForm) { // Vérifie si le formulaire existe
-    commentForm.addEventListener("submit", (event) => {
-      event.preventDefault();
-      const formData = new FormData(commentForm);
-
-      fetch("/comment-validation", {
-        method: "POST",
-        body: formData
-      })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            const commentList = document.querySelector("#comment-list");
-            if (commentList) {
-              const newComment = document.createElement("tr");
-              newComment.innerHTML = `<td>${data.comment}</td><td>${data.date}</td>`;
-              commentList.appendChild(newComment);
-            }
-            commentForm.reset();
-          } else {
-            alert("Error submitting comment");
-          }
-        });
-    });
-  }
 });
 
 
 
+
+async function fetchComments(postId) {
+  console.log("🔍 Récupération des commentaires pour le post", postId);
+  try {
+    const response = await fetch(`/api/comments?post_id=${postId}`);
+    const data = await response.json();
+    if (!data.success) {
+      console.error("Erreur lors de la récupération des commentaires:", data.message);
+      return;
+    }
+
+
+    // Sélectionne l'élément où afficher les commentaires
+    const commentsContainer = document.getElementById(`comments-${postId}`);
+    if (!commentsContainer) {
+      console.error("Container de commentaires introuvable !");
+      return;
+    }
+
+    // Vide le container avant d'ajouter les nouveaux commentaires
+    commentsContainer.innerHTML = "";
+
+    // Boucle sur chaque commentaire et l'affiche
+    data.comments.forEach(comment => {
+      const commentElement = document.createElement("div");
+      commentElement.classList.add("comment");
+
+      commentElement.innerHTML = `
+          <div class="photo-chat" data-username="${comment.username}"></div>
+          <div id="comment-username">${comment.username}</div>
+          <div id="comment-content">${comment.content}</div>
+          <div><small>${new Date(comment.created_at).toLocaleString()}</small></div>
+          <button onclick="deleteComment(${comment.id})">🗑️</button>
+      `;
+
+      commentsContainer.appendChild(commentElement);
+
+      console.log("📸 Vérification de la photo pour :", comment.username);
+    });
+
+  } catch (error) {
+    console.error("Erreur de requête fetch:", error);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const commentForm = document.querySelector("#comment-input");
+
+  if (commentForm) {
+      commentForm.addEventListener("submit", async (event) => {
+          event.preventDefault();
+
+          const formData = new FormData(commentForm);
+          const postId = formData.get("post_id");
+
+          try {
+              const response = await fetch("/api/comments", {
+                  method: "POST",
+                  body: formData
+              });
+
+              const data = await response.json();
+              if (data.success) {
+                  console.log("✅ Commentaire ajouté !");
+                  fetchComments(postId); // Rafraîchit la liste des commentaires
+                  commentForm.reset();
+              } else {
+                  alert("❌ Erreur: " + data.message);
+              }
+          } catch (error) {
+              console.error("❌ Erreur de requête fetch:", error);
+          }
+      });
+  } else {
+      console.warn("❌ Le formulaire #comment-input n'a pas été trouvé !");
+  }
+});

@@ -79,8 +79,6 @@ async function loadUserProfile(div) {
     if (userRoleEl) userRoleEl.textContent = `Role: ${data.userRole}`;
     if (notificationCountEl)
       notificationCountEl.textContent = `Notifications: ${data.notificationCount}`;
-    if (profileImage)
-      profileImage.src = `static/assets/img/${data.username}/profileImage.jpg`;
 
     if (usernameEl) usernameEl.textContent = data.username || "Rafta";
 
@@ -280,7 +278,7 @@ waitForElement("#uploadForm", () => {
       });
 
       const data = await response.json();
-      console.log(data);
+      console.log("all of menubar",data);
       if (data.success) {
         responseMessage.textContent = "✅ Image mise à jour avec succès !";
         responseMessage.style.color = "green";

@@ -307,6 +307,9 @@ export async function chatManager() {
           const li = document.createElement("li");
           li.classList.add("selectUser", "offline", "short");
           li.id = users.username;
+          li.style.backgroundImage =
+            `url('/static/assets/img/${users.username}/profileImage.jpg')`;
+            
           li.style.setProperty("--before-content", `"${users.username}"`);
           userList.appendChild(li);
         }

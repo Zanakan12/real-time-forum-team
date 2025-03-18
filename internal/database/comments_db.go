@@ -75,7 +75,11 @@ func CommentInsert(userID int, postID int, content string) error {
 }
 
 // GetCommentsByPostID retrieves all comments for a specific post ID from the database using a transaction
-func CommentSelectByPostID(postID int, db *sql.DB) ([]Comment, error) {
+func CommentSelectByPostID(postID int) ([]Comment, error) {
+	
+	db := SetupDatabase()
+	defer db.Close()
+
 	if db == nil {
 		db := SetupDatabase()
 		defer db.Close()
