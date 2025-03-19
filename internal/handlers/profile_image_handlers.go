@@ -31,9 +31,8 @@ func saveImageToUserFolder(username string, fileHeader *multipart.FileHeader, fi
 
 	// Récupérer l'extension du fichier original
 	ext := filepath.Ext(fileHeader.Filename) // Exemple : ".jpg" ou ".png"
-	if ext != ".png" {
-		ext = ".png" // Sécurité : Si pas d'extension, on met ".png"
-	}
+
+	ext = ".png" // Sécurité : Si pas d'extension, on met ".png"
 
 	// Nom du fichier toujours "profileimage.extension"
 	filePath := filepath.Join(userDir, "profileImage"+ext)
@@ -69,9 +68,9 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Récupérer le nom d'utilisateur
 	username := middlewares.GetCookie(w, r)
-	usernameDecrypted,err := db.DecryptData(username.Username)
-	if err != nil{
-		log.Printf("Erreur lors du decryptage de l'ussername %s",err)
+	usernameDecrypted, err := db.DecryptData(username.Username)
+	if err != nil {
+		log.Printf("Erreur lors du decryptage de l'ussername %s", err)
 	}
 	if usernameDecrypted == "traveller" {
 		w.WriteHeader(http.StatusBadRequest)

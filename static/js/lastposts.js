@@ -112,7 +112,7 @@ export function appendPost(post, formattedDate, postsContainer) {
     <form id="form-${post.id}" action="/post-update-validation" method="post">
         <div class="post">
             <div class="post-header">
-                <div class="photo-chat" data-username="${post.user.username}"></div>
+                <div class="photo-chat"></div>
                 <div class="username">${post.user.username}</div>
                 <span class="category">${post.categories ? post.categories : ""}</span>
                 <button id="modif-post-${post.id}" type="button" class="modif-post">✏️ Modifier</button>
@@ -228,10 +228,10 @@ async function fetchComments(postId) {
       commentElement.classList.add("comment");
 
       commentElement.innerHTML = `
-          <div class="photo-chat" data-username="${comment.username}"></div>
-          <div id="comment-username">${comment.username}</div>
-          <div id="comment-content">${comment.content}</div>
-          <div><small>${new Date(comment.created_at).toLocaleString()}</small></div>
+          <div class="photo-comment"></div>
+          <div class="comment-username">${comment.username}</div>
+          <p class="comment-content">${comment.content}</p>
+          <div class="date"><small>${new Date(comment.created_at).toLocaleString()}</small></div>
           <button onclick="deleteComment(${comment.id})">🗑️</button>
       `;
 

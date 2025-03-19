@@ -1,6 +1,6 @@
 
 export function checkProfileImage(username, element) {
-    const imgPath = `/static/assets/img/${username}/profileImage.jpg`;
+    const imgPath = `/static/assets/img/${username}/profileImage.png`;
     const img = new Image();
 
     img.src = imgPath;
@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 checkProfileImage(username, photoChat);
             }
         });
+
     }, 100);
 });
 
