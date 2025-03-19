@@ -545,7 +545,7 @@ textarea {
 
 /* Conteneur des commentaires */
 .comments-container {
-  width: 100%;
+  width: fit-content;
   max-width: 750px;
   margin: 20px auto;
   padding: 10px;

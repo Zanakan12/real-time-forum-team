@@ -231,7 +231,7 @@ async function fetchComments(postId) {
           <div class="photo-comment"></div>
           <div class="comment-username">${comment.username}</div>
           <p class="comment-content">${comment.content}</p>
-          <div class="date"><small>${new Date(comment.created_at).toLocaleString()}</small></div>
+          <div class="><small>${new Date(comment.created_at).toLocaleString()}</small></div>
           <button onclick="deleteComment(${comment.id})">🗑️</button>
       `;
 
@@ -245,35 +245,3 @@ async function fetchComments(postId) {
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  const commentForm = document.querySelector("#comment-input");
-
-  if (commentForm) {
-      commentForm.addEventListener("submit", async (event) => {
-          event.preventDefault();
-
-          const formData = new FormData(commentForm);
-          const postId = formData.get("post_id");
-
-          try {
-              const response = await fetch("/api/comments", {
-                  method: "POST",
-                  body: formData
-              });
-
-              const data = await response.json();
-              if (data.success) {
-                  console.log("✅ Commentaire ajouté !");
-                  fetchComments(postId); // Rafraîchit la liste des commentaires
-                  commentForm.reset();
-              } else {
-                  alert("❌ Erreur: " + data.message);
-              }
-          } catch (error) {
-              console.error("❌ Erreur de requête fetch:", error);
-          }
-      });
-  } else {
-      console.warn("❌ Le formulaire #comment-input n'a pas été trouvé !");
-  }
-});
