@@ -107,9 +107,10 @@ if (postsContainer) {
 export function appendPost(post, formattedDate, postsContainer) {
 
   const postElement = document.createElement("div");
-  postElement.id = "post-format"
+  postElement.id = `post-${post.id}`;
+  postElement.classList.add("post-container");
+
   postElement.innerHTML = `
-    <form id="form-${post.id}" action="/post-update-validation" method="post">
         <div class="post">
             <div class="post-header">
                 <div class="photo-chat"></div>
@@ -137,65 +138,84 @@ export function appendPost(post, formattedDate, postsContainer) {
                 <em>Status: ${post.status}</em>
             </div>
 
-            
-
             <div class="likes-buttons">
-                <form class="like-form" data-id="${post.id}" data-type="like">
-                    <button type="button" class="like-button">
-                        <span>${post.likes_count}</span>
-                        <img src="/static/assets/img/like.png" alt="Like">
-                    </button>
-                </form>
-                <form class="dislike-form" data-id="${post.id}" data-type="dislike">
-                    <button type="button" class="dislike-button">
-                        <span>${post.dislikes_count}</span>
-                        <img src="/static/assets/img/dislike.png" alt="Dislike">
-                    </button>
-                </form>
-            </div>
+    <button type="button" class="like-button" data-post-id="${post.id}">
+        <span>${post.likes_count}</span>
+        <img src="/static/assets/img/like.png" alt="Like">
+    </button>
+    <button type="button" class="dislike-button" data-post-id="${post.id}">
+        <span>${post.dislikes_count}</span>
+        <img src="/static/assets/img/dislike.png" alt="Dislike">
+    </button>
+</div>
 
             <div id="comments-${post.id}" class="comments-container">
                 <h3>Commentaires</h3>
             </div>
 
-            <form id="comment-input" action="/comment-validation" method="post" class="comment-form">
-                <input type="hidden" name="post_id" value="${post.id}">
-                <input id="content" name="content" type="text" placeholder="Make a comment here ..." required>
-                <input type="submit" value="Send">
-            </form>
+            <div id="comment-input-${post.id}" class="comment-form">
+                <input id="content-${post.id}" type="text" placeholder="Make a comment here ..." required>
+                <input type="submit" id="send-btn-${post.id}" value="Send">
+            </div>
+
+            <input type="hidden" value="${post.id}">
+            <button type="submit" class="delete-btn">🗑️</button>
         </div>
-        <form action="/post-delete-validation" method="post" class="post-delete-form">
-                <input type="hidden" name="post_id" value="${post.id}">
-                <button type="submit" class="delete-btn">🗑️</button>
-          </form>
-    </form>
-`;
+  `;
 
   postsContainer.appendChild(postElement);
+
   fetchComments(post.id);
+
+  // 🔥 Ajout de l'écouteur d'événement après insertion
+  document.getElementById(`send-btn-${post.id}`).addEventListener("click", (event) => {
+    event.preventDefault();
+    sendComment(post.id);
+  });
 }
 
 
-document.querySelectorAll(".like-button, .dislike-button").forEach(button => {
-  button.addEventListener("click", (event) => {
-    event.preventDefault();
-    const form = button.closest("form");
-    const formData = new FormData(form);
 
-    fetch("/likes-dislikes-validation", {
-      method: "POST",
-      body: formData
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          const counter = form.querySelector("span");
-          counter.textContent = data.newCount;
+document.addEventListener("click", (event) => {
+  const buttonLike = event.target.closest(".like-button");
+  const buttonDislike = event.target.closest(".dislike-button");
+  let action = null;
+  let postId;
+  if (buttonLike) {
+    action = "like";
+    postId = buttonLike.dataset.postId;
+  } else if (buttonDislike) {
+    action = "dislike";
+    postId = buttonDislike.dataset.postId;
+  }
+
+  if (!action) return;
+
+  event.preventDefault();
+
+
+  const data = new FormData();
+  data.append("post_id", postId);
+  data.append("like-dislike", action);
+
+  fetch("/likes-dislikes-validation", {
+    method: "POST",
+    body: data
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        let counter;
+        if (action === "like") {
+          counter = buttonLike.querySelector("span");
         } else {
-          alert("Error updating like/dislike");
+          counter = buttonDislike.querySelector("span");
         }
-      });
-  });
+        counter.textContent = data.newCount;
+      } else {
+        alert("Error updating like/dislike");
+      }
+    });
 });
 
 
@@ -245,3 +265,24 @@ async function fetchComments(postId) {
   }
 }
 
+
+function sendComment(id) {
+  const content = document.getElementById(`content-${id}`);
+  const contentValue = document.getElementById(`content-${id}`).value;
+  content.value = "";
+  const data = new FormData();
+  data.append("post_id", id);
+  data.append("content", contentValue);
+  fetch("/comment-validation", {
+    method: "POST",
+    body: data
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        fetchComments(id);
+      } else {
+        alert("Error sending comment");
+      }
+    });
+}

@@ -14,10 +14,11 @@ import (
 )
 
 type Response struct {
-	Success bool   `json:"success"`
-	Message string `json:"message,omitempty"`
-	Error   string `json:"error,omitempty"`
-	Image   string `json:"image,omitempty"`
+	Success  bool   `json:"success"`
+	Message  string `json:"message,omitempty"`
+	Error    string `json:"error,omitempty"`
+	Image    string `json:"image,omitempty"`
+	NewCount int    `json:"newCount"`
 }
 
 // Fonction qui sauvegarde l'image sous le nom "profileimage"

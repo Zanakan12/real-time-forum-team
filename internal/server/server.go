@@ -24,7 +24,6 @@ func InitServer() {
 	server.Handle("/post-validation", handlers.PostValidationHandler)
 	server.Handle("/post-delete-validation", handlers.PostDeleteValidationHandler)
 	server.Handle("/post-update-validation", handlers.PostUpdateValidationHandler)
-	server.Handle("/comment-validation", handlers.CommentValidationHandler)
 	server.Handle("/likes-dislikes-validation", handlers.LikesDislikesValidationHandler)
 	server.Handle("/profile", handlers.ProfileHandler)
 	server.Handle("/update-name", handlers.UpdateNameHandler)
@@ -65,6 +64,7 @@ func InitServer() {
 	http.HandleFunc("/api/chat", handlers.GetChatHistory)
 	http.HandleFunc("/api/all-user", handlers.GetAllUsersHandler)
 	http.HandleFunc("/api/comments", handlers.GetCommentsHandler)
+	http.HandleFunc("/comment-validation", handlers.CommentValidationHandler)
 	// Start the server
 	if err := server.Start(); err != nil {
 		fmt.Printf("Error starting server: %v\n", err)

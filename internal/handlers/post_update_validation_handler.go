@@ -37,7 +37,7 @@ func PostUpdateValidationHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Envoyer une réponse JSON en cas de succès
-	response := map[string]string{"success": "true", "message": "Post mis à jour avec succès"}
+	response := map[string]string{"success": "true", "message": "Mais je pense"}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)

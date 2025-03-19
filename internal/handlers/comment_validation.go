@@ -3,80 +3,92 @@ package handlers
 import (
 	"db"
 	"encoding/json"
+	"log"
 	"middlewares"
 	"net/http"
 	"strconv"
 )
 
+// Réponse standard pour les commentaires
 type CommentResponse struct {
 	Success bool   `json:"success"`
-	Message string `json:"message"`
+	Message string `json:"message,omitempty"`
 }
 
+// Réponse pour récupérer les commentaires
 type CommentListResponse struct {
-	Success  bool         `json:"success"`
-	Comments []db.Comment `json:"comments"`
-	Message  string       `json:"message,omitempty"`
+	Success  bool        `json:"success"`
+	Comments interface{} `json:"comments,omitempty"`
+	Message  string      `json:"message,omitempty"`
 }
 
-type CommentRequest struct {
-	PostID  int    `json:"post_id"`
-	Content string `json:"content"`
+// Gestion unique des commentaires (GET pour récupérer, POST pour ajouter)
+func CommentsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json") // ✅ Assure toujours une réponse en JSON
+
+	switch r.Method {
+	case http.MethodPost:
+		CommentValidationHandler(w, r)
+	case http.MethodGet:
+		GetCommentsHandler(w, r)
+	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(CommentResponse{Success: false, Message: "Method not allowed"})
+	}
 }
 
+// ✅ Handler pour ajouter un commentaire (POST)
 func CommentValidationHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	// Vérifier la session utilisateur
-	session := middlewares.GetCookie(w, r)
+	session := middlewares.GetCookie(w, r) // Vérifie l'authentification
 	if session.Username == "" {
-		http.Error(w, "Unauthorized access", http.StatusUnauthorized)
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(CommentResponse{Success: false, Message: "Unauthorized access"})
 		return
 	}
 
-	// Décoder le JSON
-	var req CommentRequest
-	err := json.NewDecoder(r.Body).Decode(&req)
+	postID, content := r.FormValue("post_id"), r.FormValue("content")
+	if postID == "" || content == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(CommentResponse{Success: false, Message: "post_id and content are required"})
+		return
+	}
+
+	convPostID, err := strconv.Atoi(postID)
 	if err != nil {
-		http.Error(w, "Invalid JSON format", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(CommentResponse{Success: false, Message: "Invalid post ID"})
 		return
 	}
 
-	// Insérer le commentaire dans la base de données
-	err = db.CommentInsert(session.UserID, req.PostID, req.Content)
+	err = db.CommentInsert(session.UserID, convPostID, content)
 	if err != nil {
-		http.Error(w, "Failed to create comment", http.StatusInternalServerError)
+		log.Printf("❌ Error while creating a comment: %v\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(CommentResponse{Success: false, Message: "Failed to create comment"})
 		return
 	}
 
-	// Récupérer les commentaires mis à jour
-	comments, err := db.CommentSelectByPostID(req.PostID)
+	// Retourner les commentaires mis à jour après insertion
+	comments, err := db.CommentSelectByPostID(convPostID)
 	if err != nil {
-		http.Error(w, "Error retrieving updated comments", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(CommentResponse{Success: false, Message: "Error retrieving updated comments"})
 		return
 	}
 
-	// Retourner la liste des commentaires
-	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(CommentListResponse{Success: true, Comments: comments})
 }
 
+// ✅ Handler pour récupérer les commentaires (GET)
 func GetCommentsHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		json.NewEncoder(w).Encode(CommentListResponse{Success: false, Message: "Method not allowed"})
-		return
-	}
-
 	postID := r.URL.Query().Get("post_id")
 	if postID == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(CommentListResponse{Success: false, Message: "Missing post_id parameter"})
 		return
 	}
+
 	postIDInt, err := strconv.Atoi(postID)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -86,6 +98,7 @@ func GetCommentsHandler(w http.ResponseWriter, r *http.Request) {
 
 	comments, err := db.CommentSelectByPostID(postIDInt)
 	if err != nil {
+		log.Printf("❌ Error retrieving comments: %v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(CommentListResponse{Success: false, Message: "Error retrieving comments"})
 		return
