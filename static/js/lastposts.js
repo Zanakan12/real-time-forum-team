@@ -113,6 +113,7 @@ export function appendPost(post, formattedDate, postsContainer) {
   postElement.innerHTML = `
         <div class="post">
             <div class="post-header">
+              
                 <div class="photo-chat"></div>
                 <div class="username">${post.user.username}</div>
                 <span class="category">${post.categories ? post.categories : ""}</span>
