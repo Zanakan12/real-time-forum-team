@@ -1,10 +1,10 @@
-document.addEventListener("DOMContentLoaded", function () {
-  function checkContainer() {
-    const categoriesSelectionContainer = document.getElementById(
-      "categories-selection-container"
-    );
-    if (categoriesSelectionContainer) {
-      categoriesSelectionContainer.innerHTML = `
+
+function checkContainer() {
+  const categoriesSelectionContainer = document.getElementById(
+    "categories-selection-container"
+  );
+  if (categoriesSelectionContainer) {
+    categoriesSelectionContainer.innerHTML = `
               <form action="/" method="post">
                 <table>
                   <tr><td colspan="4"><hr width="100%"></td></tr>
@@ -16,9 +16,7 @@ document.addEventListener("DOMContentLoaded", function () {
               </form>
               <style>#submit-button { width: 100%; }</style>
           `;
-    } else {
-      setTimeout(checkContainer, 100); // Réessayer après 100ms
-    }
+  } else {
+    setTimeout(checkContainer, 100); // Réessayer après 100ms
   }
-  checkContainer();
-});
+}

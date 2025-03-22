@@ -63,7 +63,6 @@ async function loadUserProfile(div) {
   try {
     const response = await fetch("/profile-data");
     const data = await response.json();
-    console.log(data);
     if (!data.success) {
       throw new Error(data.error || "Erreur inconnue");
     }
@@ -280,7 +279,6 @@ waitForElement("#uploadForm", () => {
       });
 
       const data = await response.json();
-      console.log(data);
       if (data.success) {
         responseMessage.textContent = "✅ Image mise à jour avec succès !";
         responseMessage.style.color = "green";

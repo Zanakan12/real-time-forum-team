@@ -1,8 +1,9 @@
 
 export function checkProfileImage(username, element) {
+
     const imgPath = `/static/assets/img/${username}/profileImage.png`;
     const img = new Image();
-
+    
     img.src = imgPath;
     img.onload = () => {
         element.style.backgroundImage = `url('${imgPath}')`;
@@ -13,15 +14,4 @@ export function checkProfileImage(username, element) {
     };
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    setTimeout(() => {
-        document.querySelectorAll(".photo-chat").forEach(photoChat => {
-            const username = photoChat.dataset.username;
-            if (username) {
-                checkProfileImage(username, photoChat);
-            }
-        });
-
-    }, 100);
-});
 

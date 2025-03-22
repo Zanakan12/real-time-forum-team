@@ -1,4 +1,5 @@
 
+import { checkProfileImage } from "/static/js/imagepath.js";
 import { fetchUserData } from "/static/js/app.js";
 export let socket;
 
@@ -81,8 +82,7 @@ async function updateUserList(users) {
     const li = document.createElement("li");
     li.classList.add("selectUser", "online");
     li.id = `${user}`;
-    li.style.backgroundImage =
-      `url('/static/assets/img/${user}/profileImage.jpg')`
+    checkProfileImage(user, li);
     if (user === username.username) li.style.setProperty("--before-content", '"Vous"');
     else li.style.setProperty("--before-content", `"${user}"`);
     usersList.appendChild(li);

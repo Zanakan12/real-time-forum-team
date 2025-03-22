@@ -2,6 +2,7 @@
 import { fetchConnectedUsers } from "/static/js/websocket.js";
 import { fetchUserData } from "/static/js/app.js";
 import { socket } from "/static/js/websocket.js";
+import { checkProfileImage } from "./imagepath.js";
 
 export async function chatManager() {
   let recipientSelect;
@@ -111,8 +112,7 @@ export async function chatManager() {
     recipientLabel.textContent = `${recipient}`;
 
     const photochat = document.getElementById("photo-chat");
-    photochat.style.backgroundImage =
-      `url('/static/assets/img/${recipient}/profileImage.jpg')`;
+    checkProfileImage(recipient, photochat);
   }
 
   const messageInput = document.getElementById("message");
@@ -307,9 +307,7 @@ export async function chatManager() {
           const li = document.createElement("li");
           li.classList.add("selectUser", "offline", "short");
           li.id = users.username;
-          li.style.backgroundImage =
-            `url('/static/assets/img/${users.username}/profileImage.jpg')`;
-            
+          checkProfileImage(users.username, li);
           li.style.setProperty("--before-content", `"${users.username}"`);
           userList.appendChild(li);
         }
@@ -320,7 +318,7 @@ export async function chatManager() {
     }
   }
 
-  let limitMessage = 10; // Nombre de messages à charger
+  let limitMessage = 11; // Nombre de messages à charger
   let totalMessages = 0; // Stocke le nombre total de messages pour éviter des erreurs
 
   async function fetchMessages(recipientSelect) {
@@ -349,8 +347,6 @@ export async function chatManager() {
       // Récupérer uniquement les `limitMessage` derniers messages
       const paginatedMessages = messages.slice(-limitMessage);
 
-      console.log("Messages affichés :", paginatedMessages);
-
       const messagesList = document.getElementById("messages");
       messagesList.innerHTML = ""; // Effacer la liste avant d'afficher
 
@@ -370,7 +366,6 @@ export async function chatManager() {
 
     if (messagesList.scrollTop === 0) {
       limitMessage += 10;
-      console.log("limite message fetched", limitMessage)
       fetchMessages(recipientSelect);
     }
   }, 10)); // Utilisation d’un throttle pour éviter le spam
@@ -406,7 +401,6 @@ export async function chatManager() {
       } else if (notification && message.type === "message") {
         let count = parseInt(notification.textContent || "0", 10);
         notification.textContent = count + 1;
-        console.log(message.username)
         const notificationOnUserPhoto = document.getElementById(`${message.username}`);
 
         if (notificationOnUserPhoto) {

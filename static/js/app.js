@@ -8,6 +8,7 @@ import { connectWebSocket } from "/static/js/websocket.js";
 import { fetchAndUpdatePosts } from "/static/js/lastposts.js";
 import { LoadAllPost } from "/static/js/newPost.js";
 import { chatManager } from "/static/js/chat.js";
+import { checkProfileImage } from "/static/js/imagepath.js";
 
 //les routes pour les éléments
 const routes = {
@@ -57,6 +58,11 @@ async function loadPage() {
           LoadAllPost();
           fetchAndUpdatePosts();
         }
+        if (hash == "profile") {
+          document.querySelectorAll(".photo-chat").forEach(photoChat => {
+            checkProfileImage(userData.username,photoChat);
+          });
+        }
       } else {
         throw new Error("Le module retourné n'est pas un élément DOM !");
       }
@@ -66,9 +72,9 @@ async function loadPage() {
     }
   } else {
     console.warn("Route inconnue, affichage de la page d'accueil.");
-    const homePage = await routes["home"]();
+    const loginPage = await routes["login"]();
     app.innerHTML = "";
-    app.appendChild(homePage);
+    app.appendChild(loginPage);
   }
 }
 
