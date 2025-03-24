@@ -96,13 +96,15 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 
 	// Ajouter l'utilisateur à la liste des connectés
 	mutex.Lock()
+	if oldConn, exists := clients[userName]; exists {
+		log.Println("Ancienne connexion détectée pour", userName, "→ fermeture")
+		oldConn.Close()
+	}
 	clients[userName] = conn
 	mutex.Unlock()
 
 	log.Println("Utilisateur connecté :", userName)
 
-	// Envoyer les messages non lus à la reconnexion
-	//fetchUnreadMessages(userName)
 	// Mettre à jour la liste des utilisateurs connectés
 	updateUserList()
 
@@ -139,10 +141,10 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 
 // Envoi d'un message à un utilisateur spécifique
 func sendMessageToUser(toUsername string, message WebSocketMessage) {
+	log.Println("on rentre jamais dans send")
 	mutex.Lock()
 	conn, online := clients[toUsername]
 	mutex.Unlock()
-
 	if online {
 		// Utilisateur en ligne → Envoi direct
 		err := conn.WriteJSON(message)
@@ -154,6 +156,7 @@ func sendMessageToUser(toUsername string, message WebSocketMessage) {
 		}
 		message.Read = true
 		if message.Type != "typing" {
+			log.Println("saving message")
 			db.SaveMessage(message.Username, message.Recipient, message.Content, message.CreatedAt, message.Read)
 		}
 
@@ -161,6 +164,7 @@ func sendMessageToUser(toUsername string, message WebSocketMessage) {
 		// Utilisateur hors ligne → Stockage en base
 		message.Read = false
 		if message.Type != "typing" {
+			
 			db.SaveMessage(message.Username, message.Recipient, message.Content, message.CreatedAt, message.Read)
 		}
 		log.Printf("Utilisateur %s hors ligne, message stocké.", toUsername)
@@ -201,7 +205,7 @@ func GetUserListJSON() string {
 	for username := range clients {
 		usernames = append(usernames, username)
 	}
-	log.Println("username",usernames)
+	log.Println("Selected user", usernames)
 	usersJSON, _ := json.Marshal(usernames)
 	return string(usersJSON)
 }

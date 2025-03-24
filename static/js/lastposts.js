@@ -187,7 +187,8 @@ async function fetchComments(postId, limiteComment = 5) {
     commentsContainer.innerHTML = "<h3>Commentaires</h3>"; // Garde le titre
 
     if (!Array.isArray(data.comments) || data.comments.length === 0) {
-      console.warn("⚠️ Aucun commentaire trouvé pour ce post.");
+      console.warn(`⚠️ Aucun commentaire trouvé pour le post: ${postId}`);
+      return;
     }
 
     const paginatedComment = data.comments.slice(-limiteComment);

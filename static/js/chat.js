@@ -124,28 +124,6 @@ export async function chatManager() {
       }
     });
 
-  document.getElementById("messages").addEventListener("scroll", function () {
-    if (this.scrollTop === 0) {
-      //loadOlderMessages(); // Fonction pour récupérer les anciens messages
-    }
-  });
-
-  /*function loadOlderMessages() {
-    const messagesList = document.getElementById("messages");
-  
-    for (let i = 0; i < 5; i++) {
-      // Simulation de chargement de 5 anciens messages
-      let oldMessage = document.createElement("li");
-      oldMessage.textContent = "Ancien message " + (i + 1);
-      oldMessage.classList.add("received");
-      messagesList.prepend(oldMessage);
-    }
-  }*/
-
-
-  // Récupérer les anciens messages
-
-
 
 
   // input texte detection
@@ -169,7 +147,6 @@ export async function chatManager() {
       };
 
       socket.send(JSON.stringify(typingObj));
-      console.log("Typing envoyé :", typingObj);
     } else {
       console.warn("WebSocket non connecté !");
     }
@@ -191,7 +168,7 @@ export async function chatManager() {
       alert("Veuillez entrer un destinataire et un message !");
       return;
     }
-
+  
     if (socket.readyState === WebSocket.OPEN) {
       const msgObj = {
         type: "message",
@@ -222,7 +199,6 @@ export async function chatManager() {
   ) {
     const messagesList = document.getElementById("messages");
     const li = document.createElement("li");
-
     if (sender == user.username) isSender = true
     else isSender = false;
     li.classList.add("message");
@@ -249,6 +225,7 @@ export async function chatManager() {
           <span class="dot">.</span>
         `;
         messagesList.appendChild(li);
+        scrollToBottom("messages")
       }
 
       // Réinitialiser le timer pour éviter une suppression prématurée
@@ -261,6 +238,7 @@ export async function chatManager() {
       // Cas normal : afficher le message
       li.innerHTML = `${content} <small>${createdAt}</small>`;
       messagesList.appendChild(li);
+      scrollToBottom("messages");
     }
 
     // Vérifier si l'utilisateur est en bas avant de scroller
@@ -318,7 +296,7 @@ export async function chatManager() {
     }
   }
 
-  let limitMessage = 11; // Nombre de messages à charger
+  let limitMessage = 10; // Nombre de messages à charger
   let totalMessages = 0; // Stocke le nombre total de messages pour éviter des erreurs
 
   async function fetchMessages(recipientSelect) {
@@ -329,7 +307,7 @@ export async function chatManager() {
         `https://localhost:8080/api/chat?recipient=${recipientSelect}`
       );
       if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
+      
       let messages = await response.json();
       messages = JSON.parse(messages);
 

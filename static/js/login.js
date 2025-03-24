@@ -55,7 +55,7 @@ export function loginPage() {
                     document.getElementById("login-error").innerText = responseData.error;
                 } else {
                     // Si tout va bien, rediriger ou afficher un message de succès
-                    window.location.href = responseData.redirectUrl || '/#home'; // Exemple de redirection
+                    window.location.href = responseData.redirectUrl || '/'; // Exemple de redirection
                 }
             }
         } else {
