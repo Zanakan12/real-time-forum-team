@@ -296,7 +296,7 @@ export async function chatManager() {
     }
   }
 
-  let limitMessage = 10; // Nombre de messages à charger
+  let limitMessage = 9; // Nombre de messages à charger
   let totalMessages = 0; // Stocke le nombre total de messages pour éviter des erreurs
 
   async function fetchMessages(recipientSelect) {
