@@ -168,7 +168,7 @@ export async function chatManager() {
       alert("Veuillez entrer un destinataire et un message !");
       return;
     }
-  
+
     if (socket.readyState === WebSocket.OPEN) {
       const msgObj = {
         type: "message",
@@ -238,7 +238,6 @@ export async function chatManager() {
       // Cas normal : afficher le message
       li.innerHTML = `${content} <small>${createdAt}</small>`;
       messagesList.appendChild(li);
-      scrollToBottom("messages");
     }
 
     // Vérifier si l'utilisateur est en bas avant de scroller
@@ -302,41 +301,63 @@ export async function chatManager() {
   async function fetchMessages(recipientSelect) {
     if (!recipientSelect) return;
 
+    const loader = document.getElementById("loader-messages");
+    loader.classList.remove("hidden"); // 👈 Affiche le loader
+
+    const startTime = Date.now(); // ⏱️ Temps de début
+
     try {
       const response = await fetch(
         `https://localhost:8080/api/chat?recipient=${recipientSelect}`
       );
       if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-      
+
       let messages = await response.json();
       messages = JSON.parse(messages);
 
       if (typeof messages === "object") {
-        messages = Object.values(messages); // Convertir l'objet en tableau
+        messages = Object.values(messages);
       }
 
-      totalMessages = messages.length; // Stocker la longueur totale des messages
+      totalMessages = messages.length;
 
-      // Vérification pour éviter les dépassements
       if (limitMessage > totalMessages) {
         limitMessage = totalMessages;
       }
 
-      // Récupérer uniquement les `limitMessage` derniers messages
       const paginatedMessages = messages.slice(-limitMessage);
 
       const messagesList = document.getElementById("messages");
-      messagesList.innerHTML = ""; // Effacer la liste avant d'afficher
+
+      const scrollPosition = messagesList.scrollHeight - messagesList.scrollTop;
+
+      messagesList.innerHTML = ""; // Efface les anciens messages
 
       paginatedMessages.forEach((msg) => {
         let isSender = msg.username === user.username;
         appendMessage(msg.type, msg.username, msg.recipient, msg.content, msg.created_at, isSender);
       });
 
+      messagesList.scrollTop = messagesList.scrollHeight - scrollPosition;
+
     } catch (error) {
       console.error("❌ Erreur lors de la récupération des messages :", error);
+    } finally {
+      const elapsed = Date.now() - startTime;
+      const MIN_DISPLAY_TIME = 600; // en ms, ajustable
+
+      const remaining = MIN_DISPLAY_TIME - elapsed;
+      if (remaining > 0) {
+        setTimeout(() => {
+          loader.classList.add("hidden");
+        }, remaining);
+      } else {
+        loader.classList.add("hidden");
+      }
     }
   }
+
+
 
 
   document.getElementById("messages").addEventListener("scroll", throttle(() => {
