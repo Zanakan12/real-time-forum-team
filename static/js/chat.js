@@ -2,7 +2,8 @@
 import { fetchConnectedUsers } from "/static/js/websocket.js";
 import { fetchUserData } from "/static/js/app.js";
 import { socket } from "/static/js/websocket.js";
-import { checkProfileImage } from "./imagepath.js";
+import { checkProfileImage } from "/static/js/imagepath.js";
+import { fetchAllUsers } from "/static/js/websocket.js";
 
 export async function chatManager() {
   let recipientSelect;
@@ -191,15 +192,15 @@ export async function chatManager() {
   function appendMessage(type, sender, recipient, content, createdAt, isSender) {
     const messagesList = document.getElementById("messages");
     const li = document.createElement("li");
-  
+
     // 🔒 Sécurité : conversion Date
     let dateString = "";
     let hourString = "";
-  
+
     try {
       const parsed = new Date(createdAt);
       if (isNaN(parsed)) throw new Error("Invalid date");
-  
+
       dateString = parsed.toISOString().split("T")[0];         // ex: "2025-03-28"
       hourString = parsed.toTimeString().substring(0, 5);       // ex: "13:23"
     } catch (e) {
@@ -208,29 +209,29 @@ export async function chatManager() {
       dateString = now.toISOString().split("T")[0];
       hourString = now.toTimeString().substring(0, 5);
     }
-  
+
     // 🎯 Affichage de la date (si différente de la précédente)
     if (dateString !== lastMessageDate) {
       const dateSeparator = document.createElement("div");
       dateSeparator.classList.add("date-separator");
-  
+
       const readableDate = new Date(dateString).toLocaleDateString("fr-FR", {
         weekday: "long",
         year: "numeric",
         month: "long",
         day: "numeric",
       });
-  
+
       dateSeparator.textContent = readableDate;
       messagesList.appendChild(dateSeparator);
       lastMessageDate = dateString;
     }
-  
+
     // 👤 Style d'envoi
     isSender = sender === user.username;
-  
+
     li.classList.add("message", isSender ? "sent" : "received");
-  
+
     // 💬 Contenu avec l’heure à droite
     li.innerHTML = `
       <div class="bubble">
@@ -238,7 +239,7 @@ export async function chatManager() {
         <span class="time">${hourString}</span>
       </div>
     `;
-  
+
     // 🟡 Gestion du "typing"
     let typingTimeout;
     if (type === "typing") {
@@ -253,7 +254,7 @@ export async function chatManager() {
         messagesList.appendChild(li);
         scrollToBottom("messages");
       }
-  
+
       clearTimeout(typingTimeout);
       typingTimeout = setTimeout(() => {
         const typingElement = document.getElementById("typing");
@@ -262,17 +263,17 @@ export async function chatManager() {
     } else {
       messagesList.appendChild(li);
     }
-  
+
     // 🧭 Scroll auto si bas
     const isScrolledToBottom =
       messagesList.scrollHeight - messagesList.clientHeight <=
       messagesList.scrollTop + 1;
-  
+
     if (isScrolledToBottom) {
       messagesList.scrollTop = messagesList.scrollHeight;
     }
   }
-  
+
 
 
   function scrollToBottom(arg) {
@@ -283,61 +284,7 @@ export async function chatManager() {
     });
   }
 
-  async function fetchAllUsers() {
-    try {
-      const response = await fetch("https://localhost:8080/api/last-messages");
-      if (!response.ok) throw new Error("Erreur lors du fetch");
 
-      const users = await response.json();
-      const currentUser = await fetchUserData();
-      const usersOnlineList = document.getElementById("users-online");
-      const usersOfflineList = document.getElementById("users-offline");
-
-      console.log(users)
-      usersOnlineList.innerHTML = "";
-      usersOfflineList.innerHTML = "";
-
-      const onlineUsers = new Set(
-        Array.from(document.querySelectorAll("#users-online li")).map((li) => li.id)
-      );
-
-      users
-        .filter((u) => u.username && u.username !== currentUser.username)
-        .sort((a, b) => {
-          if (!a.last_message) return 1;
-          if (!b.last_message) return -1;
-          return new Date(b.last_message) - new Date(a.last_message);
-        })
-        .forEach((user) => {
-          const li = document.createElement("li");
-          li.classList.add("selectUser", "short");
-          li.id = user.username;
-
-          checkProfileImage(user.username, li);
-          li.style.setProperty("--before-content", `"${user.username}"`);
-
-          // 💬 Ajout d’un petit texte visible dans le <li>
-          const label = document.createElement("small");
-          label.textContent = user.last_message
-            ? `Dernier message : ${user.last_message}`
-            : "Jamais contacté";
-
-          li.appendChild(label);
-
-          if (onlineUsers.has(user.username)) {
-            li.classList.add("online");
-            usersOnlineList.appendChild(li);
-          } else {
-            li.classList.add("offline");
-            usersOfflineList.appendChild(li);
-          }
-        });
-
-
-    } catch (err) {
-      console.error("Erreur lors du fetch last messages :", err);
-    }
-  }
 
 
   let limitMessage = 9; // Nombre de messages à charger

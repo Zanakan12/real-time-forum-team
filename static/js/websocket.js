@@ -76,6 +76,7 @@ export async function fetchConnectedUsers() {
     if (!users) return;
 
     updateUserList(JSON.parse(users));
+    fetchAllUsers(JSON.parse(users));
   } catch (error) {
     console.error("❌ Erreur lors du fetch :", error);
   }
@@ -101,4 +102,48 @@ async function updateUserList(users) {
     else li.style.setProperty("--before-content", `"${user}"`);
     usersList.appendChild(li);
   });
+}
+
+export async function fetchAllUsers(connectedUsers) {
+  try {
+    const response = await fetch("https://localhost:8080/api/last-messages");
+    if (!response.ok) throw new Error("Erreur lors du fetch");
+
+    const users = await response.json();
+    const currentUser = await fetchUserData();
+
+    const usersOfflineList = document.getElementById("users-offline");
+
+    console.log(users)
+
+    usersOfflineList.innerHTML = "";
+
+    users
+      .filter((u) => u.username && u.username !== currentUser.username)
+      .sort((a, b) => {
+        if (!a.last_message) return 1;
+        if (!b.last_message) return -1;
+        return new Date(b.last_message) - new Date(a.last_message);
+      })
+      .forEach((user) => {
+        const li = document.createElement("li");
+        li.classList.add("selectUser", "short");
+        li.id = user.username;
+
+        checkProfileImage(user.username, li);
+        li.style.setProperty("--before-content", `"${user.username}"`);
+
+
+            console.log(connectedUsers,users);
+            li.classList.add("offline");
+            usersOfflineList.appendChild(li);
+        
+
+
+      });
+
+
+  } catch (err) {
+    console.error("Erreur lors du fetch last messages :", err);
+  }
 }
