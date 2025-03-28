@@ -240,6 +240,7 @@ export async function chatManager() {
     `;
   
     // 🟡 Gestion du "typing"
+    let typingTimeout;
     if (type === "typing") {
       const checkTyping = document.getElementById("typing");
       if (!checkTyping) {
