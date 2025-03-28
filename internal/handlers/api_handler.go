@@ -94,3 +94,23 @@ func GetAllUsersHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(users)
 }
+
+func GetLastMessagesHandler(w http.ResponseWriter, r *http.Request) {
+	// Vérifie que la méthode est bien GET
+	if r.Method != http.MethodGet {
+		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
+		return
+	}
+
+	session := middlewares.GetCookie(w, r)
+	currentUser, err := db.DecryptData(session.Username)
+	if err != nil || currentUser == "" {
+		http.Error(w, "Session invalide", http.StatusUnauthorized)
+		return
+	}
+
+	lastMessages := db.GetAllUsersWithLastMessages(currentUser)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(lastMessages)
+}

@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"sort"
 
 	"fmt"
 	"log"
@@ -20,7 +21,6 @@ func createMessagesTable(db *sql.DB) {
 `
 	executeSQL(db, createTableSQL)
 }
-
 
 func GetMessages(username, recipient string) ([]WebSocketMessage, error) {
 	db := SetupDatabase()
@@ -41,7 +41,7 @@ func GetMessages(username, recipient string) ([]WebSocketMessage, error) {
 	var messages []WebSocketMessage
 	for rows.Next() {
 		var msg WebSocketMessage
-		err := rows.Scan(&msg.Username,&msg.Recipient, &msg.Content, &msg.CreatedAt)
+		err := rows.Scan(&msg.Username, &msg.Recipient, &msg.Content, &msg.CreatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -140,4 +140,93 @@ func GetAllUser(aux []string) ([]User, error) {
 	}
 
 	return users, nil
+}
+
+func GetAllUsersWithLastMessages(currentUser string) []LastMessageUser {
+	db := SetupDatabase()
+	defer db.Close()
+
+	// Étape 1 : récupérer tous les utilisateurs sauf soi-même
+	usersQuery := `SELECT username FROM users WHERE username != ?`
+	decryptedUser, _ := DecryptData(currentUser)
+	rows, err := db.Query(usersQuery, decryptedUser)
+	if err != nil {
+		log.Println("Erreur requête utilisateurs :", err)
+		return nil
+	}
+	defer rows.Close()
+
+	var users []string
+	for rows.Next() {
+		var encryptedUsername string
+		if err := rows.Scan(&encryptedUsername); err != nil {
+			continue
+		}
+		decrypted, err := DecryptData(encryptedUsername)
+		if err == nil && decrypted != "" {
+			users = append(users, decrypted)
+		}
+	}
+
+	// Étape 2 : récupérer tous les messages une seule fois
+	messagesQuery := `SELECT username, recipient, created_at FROM messages`
+	msgRows, err := db.Query(messagesQuery)
+	if err != nil {
+		log.Println("Erreur requête messages :", err)
+		return nil
+	}
+	defer msgRows.Close()
+
+	type message struct {
+		from string
+		to   string
+		time string
+	}
+	var allMessages []message
+
+	for msgRows.Next() {
+		var m message
+		if err := msgRows.Scan(&m.from, &m.to, &m.time); err == nil {
+			allMessages = append(allMessages, m)
+		}
+	}
+
+	// Étape 3 : construire la liste finale
+	var result []LastMessageUser
+	for _, user := range users {
+		var latest string
+		for _, m := range allMessages {
+			if (m.from == currentUser && m.to == user) || (m.from == user && m.to == currentUser) {
+				if latest == "" || m.time > latest {
+					latest = m.time
+				}
+			}
+		}
+		result = append(result, LastMessageUser{
+			Username:    user,
+			LastMessage: latest, // vide si jamais contacté
+		})
+	}
+
+	// Étape 4 : tri
+	var withMsg, withoutMsg []LastMessageUser
+	for _, u := range result {
+		if u.LastMessage != "" {
+			withMsg = append(withMsg, u)
+		} else {
+			withoutMsg = append(withoutMsg, u)
+		}
+	}
+
+	// Trier avec messages par date descendante
+	sort.Slice(withMsg, func(i, j int) bool {
+		return withMsg[i].LastMessage > withMsg[j].LastMessage
+	})
+
+	// Trier sans messages par nom
+	sort.Slice(withoutMsg, func(i, j int) bool {
+		return withoutMsg[i].Username < withoutMsg[j].Username
+	})
+
+	return append(withMsg, withoutMsg...)
 }

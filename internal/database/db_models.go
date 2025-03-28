@@ -121,3 +121,8 @@ type WebSocketMessage struct {
 	Read      bool   `json:"read"`
 	Sender    bool   `json:"sender"`
 }
+
+type LastMessageUser struct {
+	Username    string `json:"username"`
+	LastMessage string `json:"last_message"`
+}

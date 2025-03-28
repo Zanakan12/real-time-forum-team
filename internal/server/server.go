@@ -65,6 +65,8 @@ func InitServer() {
 	http.HandleFunc("/api/all-user", handlers.GetAllUsersHandler)
 	http.HandleFunc("/api/comments", handlers.GetCommentsHandler)
 	http.HandleFunc("/comment-validation", handlers.CommentValidationHandler)
+	http.HandleFunc("/api/last-messages", handlers.GetLastMessagesHandler)
+
 	// Start the server
 	if err := server.Start(); err != nil {
 		fmt.Printf("Error starting server: %v\n", err)

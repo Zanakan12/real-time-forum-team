@@ -160,9 +160,7 @@ export async function chatManager() {
     const recipient = recipientSelect;
     const message = messageInput.value.trim();
     const date = new Date();
-    const hour = `${String(date.getHours()).padStart(2, "0")}:${String(
-      date.getMinutes()
-    ).padStart(2, "0")}`;
+
 
     if (!recipient || !message) {
       alert("Veuillez entrer un destinataire et un message !");
@@ -175,11 +173,11 @@ export async function chatManager() {
         username: user.username,
         recipient: recipient,
         content: message,
-        created_at: hour,
+        created_at: date,
       };
 
       socket.send(JSON.stringify(msgObj));
-      appendMessage("", user.username, recipient, message, hour, true); // Affichage immédiat
+      appendMessage("", user.username, recipient, message, date, true); // Affichage immédiat
       messageInput.value = "";
     } else {
       alert("WebSocket non connecté !");
@@ -188,36 +186,63 @@ export async function chatManager() {
 
 
 
-  // Ajouter un message dans le chat
-  function appendMessage(
-    type,
-    sender,
-    recipient,
-    content,
-    createdAt,
-    isSender
-  ) {
+  let lastMessageDate = ""; // 🧠 Mémorise la dernière date affichée
+
+  function appendMessage(type, sender, recipient, content, createdAt, isSender) {
     const messagesList = document.getElementById("messages");
     const li = document.createElement("li");
-    if (sender == user.username) isSender = true
-    else isSender = false;
-    li.classList.add("message");
-
-    if (li.classList.contains("message")) {
-      if (isSender) {
-        li.classList.add("sent");
-      } else {
-        li.classList.add("received");
-      }
+  
+    // 🔒 Sécurité : conversion Date
+    let dateString = "";
+    let hourString = "";
+  
+    try {
+      const parsed = new Date(createdAt);
+      if (isNaN(parsed)) throw new Error("Invalid date");
+  
+      dateString = parsed.toISOString().split("T")[0];         // ex: "2025-03-28"
+      hourString = parsed.toTimeString().substring(0, 5);       // ex: "13:23"
+    } catch (e) {
+      console.warn("Date invalide, fallback utilisée :", createdAt);
+      const now = new Date();
+      dateString = now.toISOString().split("T")[0];
+      hourString = now.toTimeString().substring(0, 5);
     }
-
-    let typingTimeout; // Variable pour stocker le timer
-
+  
+    // 🎯 Affichage de la date (si différente de la précédente)
+    if (dateString !== lastMessageDate) {
+      const dateSeparator = document.createElement("div");
+      dateSeparator.classList.add("date-separator");
+  
+      const readableDate = new Date(dateString).toLocaleDateString("fr-FR", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+  
+      dateSeparator.textContent = readableDate;
+      messagesList.appendChild(dateSeparator);
+      lastMessageDate = dateString;
+    }
+  
+    // 👤 Style d'envoi
+    isSender = sender === user.username;
+  
+    li.classList.add("message", isSender ? "sent" : "received");
+  
+    // 💬 Contenu avec l’heure à droite
+    li.innerHTML = `
+      <div class="bubble">
+        <span class="text">${content}</span>
+        <span class="time">${hourString}</span>
+      </div>
+    `;
+  
+    // 🟡 Gestion du "typing"
     if (type === "typing") {
       const checkTyping = document.getElementById("typing");
-
       if (!checkTyping) {
-        // Si l'indicateur "typing" n'existe pas, on le crée
         li.id = "typing";
         li.innerHTML = `
           <span class="dot">.</span>
@@ -225,30 +250,29 @@ export async function chatManager() {
           <span class="dot">.</span>
         `;
         messagesList.appendChild(li);
-        scrollToBottom("messages")
+        scrollToBottom("messages");
       }
-
-      // Réinitialiser le timer pour éviter une suppression prématurée
+  
       clearTimeout(typingTimeout);
       typingTimeout = setTimeout(() => {
         const typingElement = document.getElementById("typing");
         if (typingElement) typingElement.remove();
-      }, 1000); // Disparaît après 2 secondes si aucune nouvelle frappe
+      }, 1000);
     } else {
-      // Cas normal : afficher le message
-      li.innerHTML = `${content} <small>${createdAt}</small>`;
       messagesList.appendChild(li);
     }
-
-    // Vérifier si l'utilisateur est en bas avant de scroller
-    let isScrolledToBottom =
+  
+    // 🧭 Scroll auto si bas
+    const isScrolledToBottom =
       messagesList.scrollHeight - messagesList.clientHeight <=
       messagesList.scrollTop + 1;
-
+  
     if (isScrolledToBottom) {
-      messagesList.scrollTop = messagesList.scrollHeight; // Scroll en bas seulement si l'utilisateur est déjà en bas
+      messagesList.scrollTop = messagesList.scrollHeight;
     }
   }
+  
+
 
   function scrollToBottom(arg) {
     const chatBox = document.getElementById(arg);
@@ -260,46 +284,67 @@ export async function chatManager() {
 
   async function fetchAllUsers() {
     try {
-      const response = await fetch("https://localhost:8080/api/all-user");
-      if (!response.ok) {
-        throw new Error("Erreur lors de la récupération des utilisateurs");
-      }
+      const response = await fetch("https://localhost:8080/api/last-messages");
+      if (!response.ok) throw new Error("Erreur lors du fetch");
 
       const users = await response.json();
+      const currentUser = await fetchUserData();
+      const usersOnlineList = document.getElementById("users-online");
+      const usersOfflineList = document.getElementById("users-offline");
 
-      // ⚠️ Filtrer les entrées invalides (undefined ou sans Username)
-      const validUsers = users.filter(user => user && user.username);
+      console.log(users)
+      usersOnlineList.innerHTML = "";
+      usersOfflineList.innerHTML = "";
 
-      // 🔄 Trier uniquement les éléments valides
-      const filtredUser = validUsers.sort((a, b) =>
-        a.username.localeCompare(b.username)
+      const onlineUsers = new Set(
+        Array.from(document.querySelectorAll("#users-online li")).map((li) => li.id)
       );
 
-      // 🖥️ Mise à jour du DOM
-      const userList = document.getElementById("users-offline");
-      userList.innerHTML = "";
-
-      filtredUser.forEach((users) => {
-        if (users.username !== user.username) {
+      users
+        .filter((u) => u.username && u.username !== currentUser.username)
+        .sort((a, b) => {
+          if (!a.last_message) return 1;
+          if (!b.last_message) return -1;
+          return new Date(b.last_message) - new Date(a.last_message);
+        })
+        .forEach((user) => {
           const li = document.createElement("li");
-          li.classList.add("selectUser", "offline", "short");
-          li.id = users.username;
-          checkProfileImage(users.username, li);
-          li.style.setProperty("--before-content", `"${users.username}"`);
-          userList.appendChild(li);
-        }
-      });
+          li.classList.add("selectUser", "short");
+          li.id = user.username;
 
-    } catch (error) {
-      console.error("Erreur :", error);
+          checkProfileImage(user.username, li);
+          li.style.setProperty("--before-content", `"${user.username}"`);
+
+          // 💬 Ajout d’un petit texte visible dans le <li>
+          const label = document.createElement("small");
+          label.textContent = user.last_message
+            ? `Dernier message : ${user.last_message}`
+            : "Jamais contacté";
+
+          li.appendChild(label);
+
+          if (onlineUsers.has(user.username)) {
+            li.classList.add("online");
+            usersOnlineList.appendChild(li);
+          } else {
+            li.classList.add("offline");
+            usersOfflineList.appendChild(li);
+          }
+        });
+
+
+    } catch (err) {
+      console.error("Erreur lors du fetch last messages :", err);
     }
   }
+
 
   let limitMessage = 9; // Nombre de messages à charger
   let totalMessages = 0; // Stocke le nombre total de messages pour éviter des erreurs
 
   async function fetchMessages(recipientSelect) {
     if (!recipientSelect) return;
+    lastMessageDate = ""; // ⬅️ important pour forcer l'affichage de la date au début
 
     const loader = document.getElementById("loader-messages");
     loader.classList.remove("hidden"); // 👈 Affiche le loader

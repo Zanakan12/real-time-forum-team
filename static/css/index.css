@@ -162,6 +162,32 @@ textarea {
   scrollbar-width: thin; /* Minimise la barre de scroll */
   scrollbar-color: #aaa transparent; /* Style personnalisé */
 }
+.date-separator {
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin: 15px 0 5px 0;
+  color: #888;
+}
+
+.message .bubble {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.message .text {
+  display: inline-block;
+  max-width: 75%;
+  word-wrap: break-word;
+}
+
+.message .time {
+  font-size: 0.75rem;
+  margin-left: 8px;
+  color: #888;
+  white-space: nowrap;
+}
 
 /* Messages individuels */
 #messages li {
@@ -589,10 +615,11 @@ textarea {
 .comment {
   display: flex;
   align-items: center;
+  gap: 10px;
   margin-bottom: 8px;
   border-radius: 6px;
   background: #3f3e3e;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 5px rgba(183, 44, 44, 0.1);
   transition: 0.3s ease-in-out;
   width: fit-content;
 }
@@ -614,7 +641,8 @@ textarea {
 .comment-content {
   display: flex;
   flex-direction: column;
-  border: #201e1e 1px solid;
+  border: #615e5e 1px solid;
+  border-radius: 15px;
   margin-left: 10px;
   word-wrap: break-word;
   white-space: pre-wrap; /* Permet de garder les sauts de ligne */
@@ -710,7 +738,8 @@ textarea {
   margin-bottom: 10px;
 }
 
-.post-header .photo-chat, .photo-post{
+.post-header .photo-chat,
+.photo-post {
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -827,8 +856,6 @@ textarea {
   border-radius: 50%;
   background-size: cover;
   background-position: center;
-  margin-right: 10px;
-  gap: 10px;
 }
 
 /* Bouton de suppression */

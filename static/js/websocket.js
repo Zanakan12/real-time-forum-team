@@ -19,6 +19,20 @@ export async function connectWebSocket(username) {
     }
   };
 
+  socket.onmessage = (event) => {
+    try {
+      const msg = JSON.parse(event.data);
+      if (msg.type === "user_list") {
+        const users = JSON.parse(msg.content);
+        updateUserList(users);
+      } else if (msg.type === "message") {
+        // Gère les messages normaux ici
+      }
+    } catch (error) {
+      console.error("Erreur de parsing WebSocket :", error);
+    }
+  };
+
   socket.onclose = (event) => {
     console.warn("⚠️ Connexion WebSocket fermée.", event.reason);
     setTimeout(() => {
