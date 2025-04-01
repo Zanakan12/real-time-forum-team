@@ -141,7 +141,6 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 
 // Envoi d'un message à un utilisateur spécifique
 func sendMessageToUser(toUsername string, message WebSocketMessage) {
-	log.Println("on rentre jamais dans send")
 	mutex.Lock()
 	conn, online := clients[toUsername]
 	mutex.Unlock()

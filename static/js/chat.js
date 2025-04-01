@@ -186,7 +186,6 @@ export async function chatManager() {
   }
 
 
-
   let lastMessageDate = ""; // 🧠 Mémorise la dernière date affichée
 
   function appendMessage(type, sender, recipient, content, createdAt, isSender) {
@@ -286,8 +285,7 @@ export async function chatManager() {
 
 
 
-
-  let limitMessage = 9; // Nombre de messages à charger
+  let limitMessage = 10; // Nombre de messages à charger
   let totalMessages = 0; // Stocke le nombre total de messages pour éviter des erreurs
 
   async function fetchMessages(recipientSelect) {
@@ -349,8 +347,6 @@ export async function chatManager() {
       }
     }
   }
-
-
 
 
   document.getElementById("messages").addEventListener("scroll", throttle(() => {

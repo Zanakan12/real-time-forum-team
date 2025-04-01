@@ -8,9 +8,9 @@ export function homePage() {
       <div id="lastposts-container"></div>
       <div id="chat-messages" class="fold">
               <div id="all-users" class="hidden">
-                  <h3>en ligne:</h3>
+                  
                   <ul id="users-online" name="user"></ul>
-                  <h3>hors ligne :</h3>
+                
                   <ul id="users-offline"></ul>
               </div>
 
