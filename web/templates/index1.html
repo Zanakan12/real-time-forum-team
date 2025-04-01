@@ -1,55 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/static/css/index.css" />
+    <title>Real Time Forum</title>
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="/static/css/index.css" />
-  <title>Real Time Forum</title>
-</head>
-
-<body>
-  <div id="navstick"></div>
-  <div id="chat-messages" class="fold">
-    <section>
-      <div id="all-users" class="hidden">
-        <h3>en ligne:</h3>
-        <ul id="users-online" name="user"></ul>
-        <h3>hors ligne :</h3>
-        <ul id="users-offline"></ul>
-      </div>
-
-      <div id="chat" class="hidden">
-        <div id="header-chat">
-          <div id="photo-chat"></div>
-          <div id="name-chat"></div>
-          <div id="reduce-chat">_</div>
-          <div id="close-chat">x</div>
+  <body>
+    <div id="navstick"></div>
+    <div id="chat-messages" class="fold">
+      <section>
+        <div id="all-users" class="hidden">
+          <h3>en ligne:</h3>
+          <ul id="users-online" name="user"></ul>
+          <h3>hors ligne :</h3>
+          <ul id="users-offline"></ul>
         </div>
-        <div id="loader-messages" class="hidden">
-          <div class="spinner"></div>
-        </div>
-        <ul id="messages"></ul>
 
-        <div id="chat-input-container">
-          <input id="message" type="text" placeholder="Écrivez un message" />
-          <input id="send-msg-button" type="button" />
-        </div>
-      </div>
-    </section>
-  </div>
-  <main id="app"></main>
-  <script src="/static/js/imagepath.js" type="module"></script>
-  <script src="/static/js/app.js" type="module"></script>
-  <script src="/static/js/navbar.js" type="module"></script>
-  <script src="/static/js/footer.js"></script>
-  <script src="static/js/home.js" type="module"></script>
-  <script src="/static/js/newpost.js" type="module"></script>
-  <script src="/static/js/categoriesselection.js" type="module"></script>
-  <script src="/static/js/lastposts.js" type="module"></script>
-  <script src="/static/js/chat.js" type="module"></script>
-  <script src="static/js/admin.js" type="module"></script>
-  <script src="static/js/profile.js" type="module"></script>
-</body>
+        <div id="chat" class="hidden">
+          <div id="header-chat">
+            <div id="photo-chat"></div>
+            <div id="name-chat"></div>
+            <div id="reduce-chat">_</div>
+            <div id="close-chat">x</div>
+          </div>
+          <div id="loader-messages" class="hidden">
+            <div class="spinner"></div>
+          </div>
+          <ul id="messages"></ul>
 
+          <div id="chat-input-container">
+            <input id="message" type="text" placeholder="Écrivez un message" />
+            <input id="send-msg-button" type="button" />
+          </div>
+        </div>
+      </section>
+    </div>
+    <main id="app"></main>
+    <script src="/static/js/imagepath.js" type="module"></script>
+    <script src="/static/js/app.js" type="module"></script>
+    <script src="/static/js/navbar.js" type="module"></script>
+    <script src="/static/js/footer.js"></script>
+    <script src="static/js/home.js" type="module"></script>
+    <script src="/static/js/newpost.js" type="module"></script>
+    <script src="/static/js/categoriesselection.js" type="module"></script>
+    <script src="/static/js/lastposts.js" type="module"></script>
+    <script src="/static/js/chat.js" type="module"></script>
+    <script src="static/js/admin.js" type="module"></script>
+    <script src="static/js/profile.js" type="module"></script>
+  </body>
 </html>

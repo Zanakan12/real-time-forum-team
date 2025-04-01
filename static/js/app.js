@@ -46,21 +46,24 @@ async function loadPage() {
       console.log("⚠️ WebSocket déjà actif, aucune nouvelle connexion.");
     }
   }
-
+  
   if (routes[hash]) {
     try {
       const page = await routes[hash]();
-
+      
       if (page instanceof Node) {
         app.innerHTML = "";
         app.appendChild(page);
-        if (hash == "home") {
+        
+        if (hash === "home") {
+
+          // Appel de la fonction pour charger les posts  
           LoadAllPost();
           fetchAndUpdatePosts();
         }
         if (hash == "profile") {
           document.querySelectorAll(".photo-chat").forEach(photoChat => {
-            checkProfileImage(userData.username,photoChat);
+            checkProfileImage(userData.username, photoChat);
           });
         }
       } else {
@@ -82,7 +85,7 @@ async function loadPage() {
 // Écoute les changements d'URL
 window.addEventListener("hashchange", loadPage);
 
-document.addEventListener("DOMContentLoaded", loadPage())
+document.addEventListener("DOMContentLoaded", loadPage);
 
 export async function fetchUserData() {
   try {
