@@ -33,12 +33,20 @@ async function loadPage() {
   app.innerHTML = ""; // ⚠️ S'assurer que l'ancien contenu est bien supprimé
 
   let userData = await fetchUserData();
-  if (userData && userData.username) {
+  const isAuthenticated = userData && userData.username;
 
-    if (hash === "login") hash = "home";
+  // 🔐 Bloque l'accès aux pages autres que login et register si l'utilisateur n'est pas connecté
+  if (!isAuthenticated && hash !== "login" && hash !== "register") {
+    console.warn("🚫 Accès refusé ! Redirection vers la page de connexion.");
+    hash = "login"; // Rediriger vers la page de connexion
+    window.location.hash = "#login";
+  }
+
+  if (isAuthenticated) {
+    if (hash === "login") hash = "home"; // Si connecté, rediriger login vers home
     showHiddenButton(userData);
     chatManager(userData);
-    // Vérifier si le WebSocket est déjà connecté, sinon le connecter
+
     if (!window.socket || window.socket.readyState !== WebSocket.OPEN) {
       window.socket = connectWebSocket(userData.username);
       console.log("✅ WebSocket connecté !");
@@ -46,18 +54,15 @@ async function loadPage() {
       console.log("⚠️ WebSocket déjà actif, aucune nouvelle connexion.");
     }
   }
-  
+
   if (routes[hash]) {
     try {
       const page = await routes[hash]();
-      
+
       if (page instanceof Node) {
         app.innerHTML = "";
         app.appendChild(page);
-        
-        if (hash === "home") {
-
-          // Appel de la fonction pour charger les posts  
+        if (hash == "home") {
           LoadAllPost();
           fetchAndUpdatePosts();
         }
@@ -80,6 +85,7 @@ async function loadPage() {
     app.appendChild(loginPage);
   }
 }
+
 
 
 // Écoute les changements d'URL
