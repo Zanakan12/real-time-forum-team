@@ -25,8 +25,8 @@ if (!window.socket || window.socket.readyState !== WebSocket.OPEN) {
 }
 
 async function loadPage() {
-  let redirection = "login";
-  let hash = window.location.hash.substring(1) || redirection;
+
+  let hash = window.location.hash.substring(1);
   console.log("Changement de page vers :", hash);
 
   const app = document.getElementById("app");

@@ -49,7 +49,7 @@ export async function connectWebSocket(username) {
 
 
 let lastFetchTime = 0;
-const FETCH_INTERVAL = 3000; // 5 secondes minimum entre chaque appel
+const FETCH_INTERVAL = 0; // 5 secondes minimum entre chaque appel
 
 export async function fetchConnectedUsers() {
   const now = Date.now();

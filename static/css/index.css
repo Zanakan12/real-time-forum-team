@@ -21,8 +21,9 @@ body {
       */
 
       #genre {
-        
+        background-color: rgb(91, 86, 86);
         margin-left: 45px;
+        color: white;
       }
 
 button,
