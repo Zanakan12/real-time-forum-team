@@ -20,6 +20,11 @@ body {
   }
       */
 
+      #genre {
+        
+        margin-left: 45px;
+      }
+
 button,
 input[type="submit"],
 input[type="file"]::file-selector-button {

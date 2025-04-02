@@ -23,8 +23,7 @@ export function RegisterPage() {
                 <tr>
                     <td><label for="genre">Genre</label></td> 
                     <td>
-                        <select id="genre" name="genre">
-                            <option value="">-------------</option>
+                        <select id="genre" name="genre" required>
                             <option value="male">Male</option>
                             <option value="female">Female</option>
                             <option value="other">Other</option>
