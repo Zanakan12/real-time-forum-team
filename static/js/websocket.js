@@ -49,7 +49,7 @@ export async function connectWebSocket(username) {
 
 
 let lastFetchTime = 0;
-const FETCH_INTERVAL = 0; // 5 secondes minimum entre chaque appel
+const FETCH_INTERVAL = 3000; // 5 secondes minimum entre chaque appel
 
 export async function fetchConnectedUsers() {
   const now = Date.now();
@@ -74,7 +74,7 @@ export async function fetchConnectedUsers() {
 
     const users = await response.json();
     if (!users) return;
-
+    console.log("✅ Liste des utilisateurs connectés :", users);
     fetchAllUsers(JSON.parse(users));
   } catch (error) {
     console.error("❌ Erreur lors du fetch :", error);
@@ -113,7 +113,7 @@ export async function fetchAllUsers(connectedUsers = []) { // 👈 Par défaut, 
 
         checkProfileImage(user.username, li);
         li.style.setProperty("--before-content", `"${user.username}"`);
-
+        console.log("CONNECTED USER :", connectedUsers);
         // 🔑 Vérification des utilisateurs connectés
         if (connectedUsers.includes(user.username)) {
           li.classList.add("online");

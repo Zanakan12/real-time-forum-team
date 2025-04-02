@@ -56,7 +56,7 @@ export function showHiddenButton(userData) {
   if (chatButton) chatButton.classList.remove("hidden");
   if (logoutButton) logoutButton.classList.remove("hidden");
   if (profileButton) profileButton.classList.remove("hidden");
-  if (notificationsButton) notificationsButton.classList.remove("hidden");
+  //if (notificationsButton) notificationsButton.classList.remove("hidden");
 }
 
 export function hide(arg) {
